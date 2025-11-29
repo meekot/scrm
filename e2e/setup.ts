@@ -1,6 +1,5 @@
 import { config } from 'dotenv';
-import { createClient } from '@supabase/supabase-js';
-import type { Database } from '../src/shared/supabase/types';
+import { createClient } from './supabaseClient';
 
 // Load environment variables
 config({ path: '.env.local' });
@@ -11,26 +10,16 @@ const TEST_USER = {
 };
 
 async function setup() {
-  // Create admin client using service role key (bypasses RLS)
-  const supabase = createClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-      db: {
-        schema: 'public',
-      },
-    }
-  );
+  const supabase = createClient();
 
   console.log('Setting up test user...');
 
   // Try to find and delete existing test user by email
   const { data: existingUsers } = await supabase.auth.admin.listUsers();
-  const existingUser = existingUsers?.users.find(u => u.email === TEST_USER.email);
+  const users = existingUsers?.users ?? [];
+  const existingUser = (users as Array<{ id: string; email?: string }>).find(
+    user => user.email === TEST_USER.email
+  );
 
   if (existingUser) {
     await supabase.auth.admin.deleteUser(existingUser.id);

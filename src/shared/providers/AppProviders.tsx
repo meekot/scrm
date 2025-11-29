@@ -21,3 +21,11 @@ export function AppProviders({
     </ThemeProvider>
   );
 }
+
+export function AuthProviders({ children }: { children: React.ReactNode }) {
+  return (
+    <ThemeProvider>
+      <QueryProvider>{children}</QueryProvider>
+    </ThemeProvider>
+  );
+}
