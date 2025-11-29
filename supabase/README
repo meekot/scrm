@@ -1,0 +1,177 @@
+# Supabase – Local Dev & Production Workflow
+
+> This README is for the `sevilla-crm/supabase` setup. It assumes you run the Supabase CLI via the project’s npm script: `npm run supabase -- <command>`.
+
+---
+
+## Required
+
+* **Node.js** (so the CLI from `node_modules` works)
+* **Docker** (for local Postgres/Studio/Auth)
+* Run once in project root: `npm install`
+* You can use the CLI everywhere as: `npm run supabase -- <command>`
+
+---
+
+## 1) First-time local environment
+
+```bash
+# Initialize local supabase (creates config and folders if needed)
+npm run supabase -- init
+
+# Start local stack (Postgres, Auth, Studio)
+npm run supabase -- start
+```
+
+Notes:
+
+* Migrations already committed in the repo will be applied automatically by the local stack.
+* If you ever need a clean slate: `npm run supabase -- db reset --yes` (applies migrations + seeds).
+
+---
+
+## 2) Working with Production
+
+### Create & link a Supabase project
+
+1. Create an account and a project at [https://supabase.com/](https://supabase.com/)
+2. Login the CLI:
+
+   ```bash
+   npm run supabase -- login
+   ```
+3. Link the local project to the remote project (you’ll be asked for the Project Ref):
+
+   ```bash
+   npm run supabase -- link
+   ```
+
+### Push existing migrations to Production
+
+```bash
+npm run supabase -- push
+```
+
+This will apply the committed migrations to your remote database to create the schema.
+
+### Docs to follow for ongoing work
+
+* Local development & migrations: [https://supabase.com/docs/guides/local-development](https://supabase.com/docs/guides/local-development)
+* Deploying to production: [https://supabase.com/docs/guides/deployment](https://supabase.com/docs/guides/deployment)
+
+Typical flow:
+
+1. Make schema changes locally (see “Create migrations” below)
+2. Test locally
+3. `git commit` the new migration files
+4. `npm run supabase -- push` to apply on Production
+
+---
+
+## Create migrations (local)
+
+Follow the official guide above. Most common patterns:
+
+* **Generate a migration from SQL** (edit a file then generate):
+
+  ```bash
+  # Example: stage your SQL in ./supabase/migrations/_staging.sql,
+  # then generate a named migration from the diff
+  npm run supabase -- db diff --use-migra --schema public --file migrations/<name>.sql
+  ```
+
+* **Diff from the local DB state** (after you ran your SQL locally):
+
+  ```bash
+  npm run supabase -- db diff --schema public --file migrations/<name>.sql
+  ```
+
+* **Apply locally** (fresh start + seeds):
+
+  ```bash
+  npm run supabase -- db reset --yes
+  ```
+
+> Keep migrations small and reviewable. Never edit an already-applied migration—create a new one.
+
+---
+
+## Apply new migrations to Production
+
+After committing migration files:
+
+```bash
+npm run supabase -- push
+```
+
+That’s it—the CLI applies pending migrations to the linked project.
+
+---
+
+## Sync Production data → Local (optional)
+
+We provide a helper script to dump Production data and load it into the local DB. It uses the CLI to dump and then resets + seeds the local DB.
+
+**Script:** `sevilla-crm/supabase/sync_prod_to_local.sh`
+
+**.env required (kept in `sevilla-crm/supabase/.env`, do not commit):**
+
+```dotenv
+PROJECT_REF=xxxxxx            # Project Ref from Supabase
+DB_PASSWORD=xxxxxxxxxxxxxxxx  # Postgres password for Production
+```
+
+**How it works:**
+
+1. `db dump` (data-only) from `db.<PROJECT_REF>.supabase.co:5432`
+2. `db reset` locally (runs migrations + seed)
+3. The script deletes the temporary dump file at the end
+
+**Run:**
+
+```bash
+cd supabase
+chmod +x sync_prod_to_local.sh
+./sync_prod_to_local.sh
+```
+
+**Notes:**
+
+* The script assumes `supabase/seed.sql` includes the dump (e.g. `\i supabase/dump-data.sql`).
+* We **avoid the pooler host** and connect directly to `db.<PROJECT_REF>.supabase.co` for dumps.
+* If you need to exclude sensitive tables, adapt the dump flags inside the script (e.g. exclude `auth.*` or `storage.objects`).
+
+---
+
+## Seeds
+
+* `supabase/seed.sql` can compose multiple files, for example:
+
+  ```sql
+  -- supabase/seed.sql
+  \i supabase/seed.base.sql    -- fixtures
+  \i supabase/dump-data.sql    -- optional prod dump imported by the script
+  ```
+* Seeds run on `db reset` locally. Avoid running heavy/prod-only seeds in Production.
+
+---
+
+## Troubleshooting
+
+* **SCRAM/Wrong password during dump**: verify `DB_PASSWORD` and that you target `db.<PROJECT_REF>.supabase.co:5432` (not the pooler host).
+* **Docker required**: install/start Docker Desktop.
+* **Port 54322 in use**: stop conflicting containers or adjust `config.toml`.
+* **No data after reset**: confirm `seed.sql` includes `\i supabase/dump-data.sql` and the dump step completes before reset.
+
+---
+
+## Security & Git hygiene
+
+* Add to `.gitignore`:
+
+  ```gitignore
+  supabase/.env
+  supabase/dump-data.sql
+  supabase/dumps/
+  ```
+* Keep credentials only in `.env`. The sync script removes the dump after import.

@@ -1,0 +1,32 @@
+# Dependencies
+node_modules
+
+# Production
+.next
+out
+build
+dist
+
+# Generated files
+src/infrastructure/persistence/supabase/types.ts
+
+# Cache
+.turbo
+.cache
+
+# Misc
+.DS_Store
+*.pem
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+
+# Package manager
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
