@@ -4,7 +4,7 @@
 
 - **Mobile First** — interfaces are optimized for mobile from day one;
 - **Simplicity** — intuitive UI with a focus on minimal user friction;
-- **DDD Modern Architecture** — each feature is isolated, scalable, and easily extendable;
+- **Modern Architecture** — each feature is isolated, scalable, and easily extendable;
 - **AI-powered development** — we accelerate planning, development, and maintenance using AI (e.g. code generation, testing, documentation);
 - **AI integration in business processes** — every module can be extended with AI capabilities such as booking assistants, customer analytics, or smart recommendations.
 
