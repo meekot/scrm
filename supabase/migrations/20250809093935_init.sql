@@ -376,23 +376,20 @@ FOR DELETE TO authenticated
 USING (public.is_member_of_entity(public.appointments.entity_id));
 
 -- ---------- Grants (lean, RLS-first) ----------
-GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
+GRANT USAGE ON SCHEMA public TO anon, authenticated;
 
 -- Functions: EXECUTE only to roles that need them
-GRANT EXECUTE ON FUNCTION public.is_member_of_entity(uuid) TO authenticated, service_role;
-GRANT EXECUTE ON FUNCTION public.next_scoped_no(text, uuid) TO authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.is_member_of_entity(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.next_scoped_no(text, uuid) TO authenticated;
 
 -- Reset and grant minimum
-REVOKE ALL ON ALL TABLES    IN SCHEMA public FROM anon, authenticated, service_role;
-REVOKE ALL ON ALL SEQUENCES IN SCHEMA public FROM anon, authenticated, service_role;
+REVOKE ALL ON ALL TABLES    IN SCHEMA public FROM anon, authenticated;
+REVOKE ALL ON ALL SEQUENCES IN SCHEMA public FROM anon, authenticated;
 
 GRANT SELECT ON TABLE public.entity, public.entity_members TO authenticated;
 
 GRANT SELECT, INSERT, UPDATE, DELETE
   ON TABLE public.clients, public.services, public.appointments
   TO authenticated;
-
--- Sequences are server-side only. If your backend with service_role needs it:
--- GRANT USAGE, SELECT ON SEQUENCE public.entity_display_seq TO service_role;
 
 RESET ALL;
