@@ -15,6 +15,7 @@ export function ThemeSwitcher() {
       size="icon"
       onClick={toggleTheme}
       aria-label={`Switch to ${isDark ? 'light' : 'dark'} theme`}
+      aria-live="polite"
     >
       {isDark ? <Sun className="size-5" /> : <Moon className="size-5" />}
       <span className="sr-only">Toggle theme</span>

@@ -14,33 +14,28 @@ type ThemeContextValue = {
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
-function resolveInitialTheme(): Theme {
-  if (typeof window === 'undefined') {
-    return 'light';
-  }
-
-  const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
-  if (stored === 'light' || stored === 'dark') {
-    return stored;
-  }
-
-  const prefersDark = window.matchMedia
-    ? window.matchMedia('(prefers-color-scheme: dark)').matches
-    : false;
-  return prefersDark ? 'dark' : 'light';
-}
-
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>(() => resolveInitialTheme());
+  const [theme, setThemeState] = useState<Theme>('light');
 
   useEffect(() => {
-    if (typeof document === 'undefined') return;
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
 
-    document.documentElement.setAttribute('data-theme', theme);
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem(THEME_STORAGE_KEY, theme);
-    }
-  }, [theme]);
+    const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
+    const resolved =
+      stored === 'light' || stored === 'dark'
+        ? stored
+        : window.matchMedia?.('(prefers-color-scheme: dark)').matches
+          ? 'dark'
+          : 'light';
+
+    const frame = window.requestAnimationFrame(() => {
+      setThemeState(resolved);
+      document.documentElement.setAttribute('data-theme', resolved);
+      window.localStorage.setItem(THEME_STORAGE_KEY, resolved);
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
 
   const setTheme = useCallback((value: Theme) => {
     setThemeState(value);
@@ -58,6 +53,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }),
     [theme, setTheme, toggleTheme]
   );
+
+  useEffect(() => {
+    if (typeof document === 'undefined' || typeof window === 'undefined') return;
+    document.documentElement.setAttribute('data-theme', theme);
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+  }, [theme]);
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }

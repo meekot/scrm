@@ -3,6 +3,7 @@
 import { QueryProvider } from '@/shared/lib/react-query';
 import { EntityProvider } from '@/features/entity';
 import { ThemeProvider } from '@/shared/theme';
+import { ToastProvider } from '@/shared/ui/toast';
 
 export function AppProviders({
   children,
@@ -14,9 +15,11 @@ export function AppProviders({
   return (
     <ThemeProvider>
       <QueryProvider>
-        <EntityProvider initialEntityId={initialEntityId}>
-          {children}
-        </EntityProvider>
+        <ToastProvider>
+          <EntityProvider initialEntityId={initialEntityId}>
+            {children}
+          </EntityProvider>
+        </ToastProvider>
       </QueryProvider>
     </ThemeProvider>
   );
@@ -25,7 +28,9 @@ export function AppProviders({
 export function AuthProviders({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider>
-      <QueryProvider>{children}</QueryProvider>
+      <QueryProvider>
+        <ToastProvider>{children}</ToastProvider>
+      </QueryProvider>
     </ThemeProvider>
   );
 }

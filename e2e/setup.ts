@@ -1,5 +1,5 @@
 import { config } from 'dotenv';
-import { createClient } from './supabaseClient';
+import { createSupabaseClient } from './supabaseClient';
 
 // Load environment variables
 config({ path: '.env.local' });
@@ -10,7 +10,7 @@ const TEST_USER = {
 };
 
 async function setup() {
-  const supabase = createClient();
+  const supabase = createSupabaseClient();
 
   console.log('Setting up test user...');
 
