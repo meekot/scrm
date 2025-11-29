@@ -1,8 +1,5 @@
-export default function ClientsPage() {
-  return (
-    <div>
-      <h1>Clients</h1>
-      <p>Client management page - coming soon</p>
-    </div>
-  );
+import { ClientsPage } from '@/features/clients';
+
+export default function ClientsRoute() {
+  return <ClientsPage />;
 }
