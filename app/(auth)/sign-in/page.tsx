@@ -1,3 +1,5 @@
+import { SignInForm } from '@/features/auth/components/SignInForm';
+
 export default function SignInPage() {
   return (
     <div className="space-y-6">
@@ -8,11 +10,7 @@ export default function SignInPage() {
         </p>
       </div>
 
-      <div className="space-y-4">
-        <p className="text-sm text-center text-muted-foreground">
-          Sign-in form will be implemented next
-        </p>
-      </div>
+      <SignInForm />
     </div>
   );
 }

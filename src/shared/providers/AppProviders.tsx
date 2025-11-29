@@ -2,6 +2,7 @@
 
 import { QueryProvider } from '@/shared/lib/react-query';
 import { EntityProvider } from '@/features/entity';
+import { ThemeProvider } from '@/shared/theme';
 
 export function AppProviders({
   children,
@@ -11,10 +12,12 @@ export function AppProviders({
   initialEntityId?: string;
 }) {
   return (
-    <QueryProvider>
-      <EntityProvider initialEntityId={initialEntityId}>
-        {children}
-      </EntityProvider>
-    </QueryProvider>
+    <ThemeProvider>
+      <QueryProvider>
+        <EntityProvider initialEntityId={initialEntityId}>
+          {children}
+        </EntityProvider>
+      </QueryProvider>
+    </ThemeProvider>
   );
 }

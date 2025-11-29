@@ -3,8 +3,7 @@
 Below is the full project structure **with descriptions for every directory and important file**.
 
 ```txt
-src/
-  app/
+app/
     layout.tsx
       - Root layout for the entire application.
       - Injects global providers (Theme, QueryClient, EntityContext).
@@ -61,6 +60,7 @@ src/
             route.ts
               - Server cron endpoint (cleanup tasks, migrations, etc.)
 
+src/
   features/
     entity/
       context.ts

@@ -16,20 +16,19 @@ export function EntityProvider({
   children: React.ReactNode;
   initialEntityId?: string;
 }) {
-  const [entityId, setEntityId] = useState<string | null>(initialEntityId ?? null);
+  // Initialize from localStorage or initialEntityId
+  const [entityId, setEntityId] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('selectedEntityId');
+      return stored || initialEntityId || null;
+    }
+    return initialEntityId ?? null;
+  });
 
   // Persist entity selection to localStorage
   useEffect(() => {
     if (entityId) {
       localStorage.setItem('selectedEntityId', entityId);
-    }
-  }, [entityId]);
-
-  // Load from localStorage on mount
-  useEffect(() => {
-    const stored = localStorage.getItem('selectedEntityId');
-    if (stored && !entityId) {
-      setEntityId(stored);
     }
   }, [entityId]);
 
