@@ -102,7 +102,8 @@ describe('clients queries', () => {
 
       await listClients(client, 'entity-1');
 
-      const selectCall = select.mock.calls[0][0];
+      expect(select).toHaveBeenCalled();
+      const selectCall = select.mock.calls[0]?.[0] as string;
       expect(selectCall).toContain('id');
       expect(selectCall).toContain('name');
       expect(selectCall).toContain('phone');
@@ -124,7 +125,8 @@ describe('clients queries', () => {
 
       await listClients(client, 'entity-1');
 
-      const selectCall = select.mock.calls[0][0];
+      expect(select).toHaveBeenCalled();
+      const selectCall = select.mock.calls[0]?.[0] as string;
       expect(selectCall).toContain('service_id');
       expect(selectCall).toContain('price');
       expect(selectCall).toContain('date');
