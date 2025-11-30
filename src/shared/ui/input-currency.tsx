@@ -16,8 +16,15 @@ const symbols: Record<string, string> = {
 };
 
 const InputCurrency = forwardRef<HTMLInputElement, InputCurrencyProps>(
-  ({ className, currencySymbol, ...props }, ref) => {
+  ({ className, currencySymbol, onFocus, ...props }, ref) => {
     const symbol = currencySymbol ?? symbols[entityDefaults.currency] ?? "€";
+
+    const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+      // Select all text on focus for easier replacement
+      e.target.select();
+      // Call original onFocus handler if provided
+      onFocus?.(e);
+    };
 
     return (
       <div className="relative">
@@ -31,6 +38,7 @@ const InputCurrency = forwardRef<HTMLInputElement, InputCurrencyProps>(
           min="0"
           step="0.01"
           className={`pl-9 ${className ?? ""}`}
+          onFocus={handleFocus}
           {...props}
         />
       </div>

@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { createClient as createBrowserClient } from '@/shared/supabase/client-browser';
 import { useRequiredEntity } from '@/features/entity';
+import { formatDate } from '@/shared/lib/formatters';
 import { Button } from '@/shared/ui/button';
 import { Separator } from '@/shared/ui/separator';
 import { useAppointments } from '../hooks';
@@ -49,7 +50,7 @@ export function AppointmentsPage() {
               <AppointmentForm
                 client={supabase}
                 entityId={entityId}
-                onCreated={() => {
+                onSuccess={() => {
                   setCreateOpen(false);
                 }}
               />
@@ -110,7 +111,7 @@ function CalendarView({
     <div className="grid gap-4 md:grid-cols-2">
       {Object.entries(grouped).map(([date, items]) => (
         <div key={date} className="rounded-lg border p-3">
-          <p className="text-sm font-semibold">{new Date(date).toDateString()}</p>
+          <p className="text-sm font-semibold">{formatDate(date, { dateStyle: 'long' })}</p>
           <Separator className="my-2" />
           <div className="space-y-2">
             {items.map((appt) => (

@@ -1,6 +1,7 @@
 "use client";
 
 import { Calendar, Check, Clock, Instagram, PhoneCall, XCircle } from 'lucide-react';
+import { formatCurrency, formatDateTime } from '@/shared/lib/formatters';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Badge } from '@/shared/ui/badge';
@@ -40,7 +41,7 @@ export function AppointmentCard({ appointment, client, entityId }: Props) {
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Calendar className="size-4" />
             <span>
-              {new Date(`${appointment.date}T${appointment.time ?? '00:00'}`).toLocaleString()}
+              {formatDateTime(`${appointment.date}T${appointment.time ?? '00:00'}`)}
             </span>
           </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -76,7 +77,7 @@ export function AppointmentCard({ appointment, client, entityId }: Props) {
       <Separator />
       <CardContent className="space-y-2 text-sm text-muted-foreground">
         <p>Client: {clientDisplay}</p>
-        <p>Price: €{Number(appointment.price).toFixed(2)}</p>
+        <p>Price: {formatCurrency(appointment.price)}</p>
         <div className="flex items-center gap-2">
           {isPending ? (
             <>

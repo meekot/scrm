@@ -5,6 +5,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@/shared/supabase/types';
 import type { ClientWithStats } from '../queries';
 import { useClients, useDeleteClient } from '../hooks';
+import { formatCurrency, formatDate, formatDateTime } from '@/shared/lib/formatters';
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card';
 import { Separator } from '@/shared/ui/separator';
 import { Button } from '@/shared/ui/button';
@@ -249,16 +250,12 @@ function ClientCard({
           <CardContent className="flex flex-col gap-1 text-sm text-muted-foreground">
             {client.instagram ? <p>Instagram: {client.instagram}</p> : null}
             {client.lead_source ? <p>Lead source: {client.lead_source}</p> : null}
-            <p>Created: {new Date(client.created_at).toLocaleDateString()}</p>
+            <p>Created: {formatDate(client.created_at)}</p>
             <p>Total appointments: {appointmentCount}</p>
-            <p>Total spent: €{totalSpent.toFixed(2)}</p>
+            <p>Total spent: {formatCurrency(totalSpent)}</p>
             {lastAppointment ? (
               <p>
-                Last appointment:{' '}
-                {new Date(lastAppointment).toLocaleString(undefined, {
-                  dateStyle: 'medium',
-                  timeStyle: 'short',
-                })}
+                Last appointment: {formatDateTime(lastAppointment, { dateStyle: 'medium', timeStyle: 'short' })}
               </p>
             ) : (
               <p>Last appointment: -</p>

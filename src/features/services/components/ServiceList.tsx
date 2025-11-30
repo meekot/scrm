@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { Pencil, Trash2 } from 'lucide-react';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@/shared/supabase/types';
-import { entityDefaults } from '@/shared/config/entity';
+import { formatCurrency } from '@/shared/lib/formatters';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Button } from '@/shared/ui/button';
 import {
@@ -61,7 +61,7 @@ export function ServiceList({ client, entityId }: ServiceListProps) {
             <div>
               <CardTitle className="text-base">{service.name}</CardTitle>
               <p className="text-sm text-muted-foreground">
-                {formatPrice(service.price)} {service.duration ? `• ${service.duration} min` : ''}
+                {formatCurrency(service.price)} {service.duration ? `• ${service.duration} min` : ''}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -159,12 +159,4 @@ export function ServiceList({ client, entityId }: ServiceListProps) {
       </Dialog>
     </div>
   );
-}
-
-function formatPrice(value: number | null): string {
-  if (value === null || value === undefined) return '-';
-  return Intl.NumberFormat(entityDefaults.locale, {
-    style: 'currency',
-    currency: entityDefaults.currency,
-  }).format(Number(value));
 }
