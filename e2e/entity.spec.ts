@@ -1,8 +1,5 @@
-import { config } from 'dotenv';
 import { expect, test } from '@playwright/test';
 import { createSupabaseClient } from './supabaseClient';
-
-config({ path: '.env.local' });
 
 const client = createSupabaseClient();
 

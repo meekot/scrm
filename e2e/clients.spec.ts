@@ -1,8 +1,5 @@
-import { config } from 'dotenv';
 import { test, expect } from '@playwright/test';
 import { createSupabaseClient } from './supabaseClient';
-
-config({ path: '.env.local' });
 
 const client = createSupabaseClient();
 const PASSWORD = 'Testpass123!';

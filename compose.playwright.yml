@@ -1,0 +1,17 @@
+services:
+  playwright:
+    image: mcr.microsoft.com/playwright:v1.57.0-jammy
+    working_dir: /app
+    volumes:
+      - .:/app
+    user: "${UID:-1000}:${GID:-1000}"
+    env_file:
+      - .env.e2e
+    environment:
+      CI: "0"
+      PLAYWRIGHT_UI_PORT: "9323"
+      # DEBUG: "pw:api,pw:browser,*"
+    ports:
+      - "9323:9323"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
