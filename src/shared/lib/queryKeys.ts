@@ -27,9 +27,12 @@ export const queryKeys = {
 
   // Analytics
   analytics: {
-    monthlyRevenue: (entityId: string, month: string) =>
-      ['analytics', entityId, 'monthly-revenue', month] as const,
-    kpis: (entityId: string) => ['analytics', entityId, 'kpis'] as const,
+    clientsCount: (entityId: string) => ['analytics', entityId, 'clients-count'] as const,
+    servicesCount: (entityId: string) => ['analytics', entityId, 'services-count'] as const,
+    appointmentsCount: (entityId: string, rangeKey: string) =>
+      ['analytics', entityId, 'appointments-count', rangeKey] as const,
+    revenueTotal: (entityId: string, rangeKey: string) =>
+      ['analytics', entityId, 'revenue-total', rangeKey] as const,
   },
 
   // Auth
