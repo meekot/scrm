@@ -11,9 +11,9 @@ type QueryResult = {
 
 const createListClientsMock = (orderResult: QueryResult) => {
   const order = vi.fn(async () => orderResult);
-  const eq = vi.fn(() => ({ order }));
-  const select = vi.fn(() => ({ eq }));
-  const from = vi.fn(() => ({ select }));
+  const eq = vi.fn((column: string, value: string) => ({ order }));
+  const select = vi.fn((query: string) => ({ eq }));
+  const from = vi.fn((table: string) => ({ select }));
   const client = { from } as unknown as SupabaseClient<Database>;
 
   return { order, eq, select, from, client };
