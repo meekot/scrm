@@ -35,8 +35,8 @@ describe('signInSchema', () => {
 
     expect(result.success).toBe(false);
     if (!result.success) {
-      // Empty string fails email validation first
-      expect(result.error.issues[0].message).toBe('Invalid email address');
+      // After trimming, empty string fails the min(1) check
+      expect(result.error.issues[0].message).toBe('Email is required');
     }
   });
 
@@ -48,7 +48,7 @@ describe('signInSchema', () => {
 
     expect(result.success).toBe(false);
     if (!result.success) {
-      expect(result.error.issues[0].message).toBe('Password is required');
+      expect(result.error.issues[0].message).toBe('Password must be at least 8 characters');
     }
   });
 

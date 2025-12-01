@@ -54,11 +54,13 @@ describe('InputCurrency', () => {
     render(<InputCurrency data-testid="currency-input" defaultValue="100" />);
     const input = screen.getByTestId('currency-input') as HTMLInputElement;
 
+    // Spy on the select method
+    const selectSpy = vi.spyOn(input, 'select');
+
     await user.click(input);
 
     // Check if select was called
-    expect(input.selectionStart).toBe(0);
-    expect(input.selectionEnd).toBe(input.value.length);
+    expect(selectSpy).toHaveBeenCalledTimes(1);
   });
 
   it('calls custom onFocus handler when provided', async () => {

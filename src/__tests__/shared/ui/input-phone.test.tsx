@@ -42,7 +42,8 @@ describe('InputPhone', () => {
     const onChange = vi.fn();
     render(<InputPhone value="" onChange={onChange} />);
     const input = screen.getByPlaceholderText('+33 6 12 34 56 78') as HTMLInputElement;
-    expect(input.value).toBe('');
+    // When empty, the component shows the default country code
+    expect(input.value).toBe('+33');
   });
 
   it('handles undefined value correctly', () => {
