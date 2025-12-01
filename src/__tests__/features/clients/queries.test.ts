@@ -2,6 +2,22 @@ import { describe, expect, it, vi } from 'vitest';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@/shared/supabase/types';
 import { listClients } from '@/features/clients/queries';
+import type { ClientWithStats } from '@/features/clients/queries';
+
+type QueryResult = {
+  data: ClientWithStats[] | null;
+  error: Error | null;
+};
+
+const createListClientsMock = (orderResult: QueryResult) => {
+  const order = vi.fn(async () => orderResult);
+  const eq = vi.fn(() => ({ order }));
+  const select = vi.fn(() => ({ eq }));
+  const from = vi.fn(() => ({ select }));
+  const client = { from } as unknown as SupabaseClient<Database>;
+
+  return { order, eq, select, from, client };
+};
 
 describe('clients queries', () => {
   describe('listClients', () => {
@@ -42,11 +58,10 @@ describe('clients queries', () => {
         },
       ];
 
-      const order = vi.fn().mockResolvedValue({ data: mockData, error: null });
-      const eq = vi.fn(() => ({ order }));
-      const select = vi.fn(() => ({ eq }));
-      const from = vi.fn(() => ({ select }));
-      const client = { from } as unknown as SupabaseClient<Database>;
+      const { order, eq, select, from, client } = createListClientsMock({
+        data: mockData,
+        error: null,
+      });
 
       const result = await listClients(client, 'entity-1');
 
@@ -60,11 +75,7 @@ describe('clients queries', () => {
     });
 
     it('returns empty array when no clients exist', async () => {
-      const order = vi.fn().mockResolvedValue({ data: [], error: null });
-      const eq = vi.fn(() => ({ order }));
-      const select = vi.fn(() => ({ eq }));
-      const from = vi.fn(() => ({ select }));
-      const client = { from } as unknown as SupabaseClient<Database>;
+      const { client } = createListClientsMock({ data: [], error: null });
 
       const result = await listClients(client, 'entity-1');
 
@@ -72,21 +83,16 @@ describe('clients queries', () => {
     });
 
     it('throws on Supabase error', async () => {
-      const order = vi.fn().mockResolvedValue({ data: null, error: new Error('DB error') });
-      const eq = vi.fn(() => ({ order }));
-      const select = vi.fn(() => ({ eq }));
-      const from = vi.fn(() => ({ select }));
-      const client = { from } as unknown as SupabaseClient<Database>;
+      const { client } = createListClientsMock({
+        data: null,
+        error: new Error('DB error'),
+      });
 
       await expect(listClients(client, 'entity-1')).rejects.toThrow('DB error');
     });
 
     it('properly scopes query to entity_id', async () => {
-      const order = vi.fn().mockResolvedValue({ data: [], error: null });
-      const eq = vi.fn(() => ({ order }));
-      const select = vi.fn(() => ({ eq }));
-      const from = vi.fn(() => ({ select }));
-      const client = { from } as unknown as SupabaseClient<Database>;
+      const { eq, client } = createListClientsMock({ data: [], error: null });
 
       await listClients(client, 'entity-xyz');
 
@@ -94,11 +100,7 @@ describe('clients queries', () => {
     });
 
     it('includes all required client fields in select', async () => {
-      const order = vi.fn().mockResolvedValue({ data: [], error: null });
-      const eq = vi.fn(() => ({ order }));
-      const select = vi.fn(() => ({ eq }));
-      const from = vi.fn(() => ({ select }));
-      const client = { from } as unknown as SupabaseClient<Database>;
+      const { select, client } = createListClientsMock({ data: [], error: null });
 
       await listClients(client, 'entity-1');
 
@@ -118,11 +120,7 @@ describe('clients queries', () => {
     });
 
     it('includes required appointment fields in nested select', async () => {
-      const order = vi.fn().mockResolvedValue({ data: [], error: null });
-      const eq = vi.fn(() => ({ order }));
-      const select = vi.fn(() => ({ eq }));
-      const from = vi.fn(() => ({ select }));
-      const client = { from } as unknown as SupabaseClient<Database>;
+      const { select, client } = createListClientsMock({ data: [], error: null });
 
       await listClients(client, 'entity-1');
 

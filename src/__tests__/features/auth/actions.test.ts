@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import { signIn } from '@/features/auth/actions';
+import type { Database } from '@/shared/supabase/types';
 
 // Mock Next.js functions
 vi.mock('next/navigation', () => ({
@@ -78,11 +80,13 @@ describe('auth actions', () => {
       const { createClient } = await import('@/shared/supabase/client-server');
       const mockSignIn = vi.fn().mockResolvedValue({ error: null });
 
-      vi.mocked(createClient).mockResolvedValue({
-        auth: {
-          signInWithPassword: mockSignIn,
-        },
-      } as any);
+      vi.mocked(createClient).mockResolvedValue(
+        {
+          auth: {
+            signInWithPassword: mockSignIn,
+          },
+        } as unknown as SupabaseClient<Database>
+      );
 
       const formData = new FormData();
       formData.append('email', 'test@example.com');
@@ -103,11 +107,13 @@ describe('auth actions', () => {
         error: { message: 'Invalid credentials' },
       });
 
-      vi.mocked(createClient).mockResolvedValue({
-        auth: {
-          signInWithPassword: mockSignIn,
-        },
-      } as any);
+      vi.mocked(createClient).mockResolvedValue(
+        {
+          auth: {
+            signInWithPassword: mockSignIn,
+          },
+        } as unknown as SupabaseClient<Database>
+      );
 
       const formData = new FormData();
       formData.append('email', 'test@example.com');
@@ -122,11 +128,13 @@ describe('auth actions', () => {
       const { createClient } = await import('@/shared/supabase/client-server');
       const mockSignIn = vi.fn().mockResolvedValue({ error: null });
 
-      vi.mocked(createClient).mockResolvedValue({
-        auth: {
-          signInWithPassword: mockSignIn,
-        },
-      } as any);
+      vi.mocked(createClient).mockResolvedValue(
+        {
+          auth: {
+            signInWithPassword: mockSignIn,
+          },
+        } as unknown as SupabaseClient<Database>
+      );
 
       const formData = new FormData();
       formData.append('email', '  test@example.com  ');
