@@ -34,7 +34,7 @@ export async function getAppointmentsDateRangeCount(
 ) {
   let query = supabase
     .from('appointments')
-    .select('id', { count: 'exact', head: true })
+    .select('id')
     .eq('entity_id', entityId)
     .gte('date', startDate);
 
@@ -46,10 +46,10 @@ export async function getAppointmentsDateRangeCount(
     query = query.in('status', statuses);
   }
 
-  const { count, error } = await query;
+  const { data, error } = await query;
 
   if (error) throw error;
-  return count ?? 0;
+  return data?.length ?? 0;
 }
 
 export async function getAppointmentsRevenueTotal(
@@ -67,7 +67,7 @@ export async function getAppointmentsRevenueTotal(
 ) {
   let query = supabase
     .from('appointments')
-    .select('total:price.sum()')
+    .select('price')
     .eq('entity_id', entityId)
     .gte('date', startDate);
 
@@ -79,8 +79,8 @@ export async function getAppointmentsRevenueTotal(
     query = query.in('status', statuses);
   }
 
-  const { data, error } = await query.single();
+  const { data, error } = await query;
 
   if (error) throw error;
-  return Number(data?.total ?? 0);
+  return data?.reduce((total, a) => total + (a.price || 0), 0);
 }

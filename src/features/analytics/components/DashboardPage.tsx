@@ -48,6 +48,7 @@ export function DashboardPage() {
   } = useAppointmentsRevenueTotal(supabase, entityId, {
     startDate: startOfMonthIso,
     endDate: startOfNextMonthIso,
+    statuses: ['completed', 'scheduled']
   });
 
   const isLoading = clientsLoading || servicesLoading || appointmentsLoading || revenueLoading;
@@ -79,7 +80,7 @@ export function DashboardPage() {
           </p>
         </div>
         <div className="rounded-lg border bg-card p-6">
-          <h3 className="text-sm font-medium text-muted-foreground">Appointments Today</h3>
+          <h3 className="text-sm font-medium text-muted-foreground">Appointments Today Todo</h3>
           <p className="text-2xl font-bold">
             {isLoading ? 'Loading…' : formatNumber(appointmentsTodayTotal)}
           </p>
@@ -89,7 +90,7 @@ export function DashboardPage() {
           <p className="text-2xl font-bold">{isLoading ? 'Loading…' : formatNumber(servicesTotal)}</p>
         </div>
         <div className="rounded-lg border bg-card p-6">
-          <h3 className="text-sm font-medium text-muted-foreground">Monthly Revenue</h3>
+          <h3 className="text-sm font-medium text-muted-foreground">Potencial Monthly Revenue</h3>
           <p className="text-2xl font-bold">
             {isLoading ? 'Loading…' : formatCurrency(monthlyRevenueTotal)}
           </p>

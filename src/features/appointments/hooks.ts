@@ -2,16 +2,28 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@/shared/supabase/types';
 import { queryKeys } from '@/shared/lib/queryKeys';
-import { listAppointments } from './queries';
+import { listAppointmentsWithRelations, type ListAppointmentsOptions } from './queries';
 import { createAppointment, updateAppointment, updateAppointmentStatus } from './mutations';
 import type { AppointmentInput } from './schemas';
 
 type Supabase = SupabaseClient<Database>;
 
-export function useAppointments(client: Supabase, entityId: string) {
+export function useAppointments(client: Supabase, entityId: string, options?: ListAppointmentsOptions) {
+  const queryKey = [
+    ...queryKeys.appointments.all(entityId),
+    'list',
+    {
+      page: options?.page,
+      pageSize: options?.pageSize,
+      searchTerm: options?.searchTerm ?? null,
+      searchFields: options?.searchFields,
+      sort: options?.sort,
+    },
+  ] as const;
+
   return useQuery({
-    queryKey: queryKeys.appointments.all(entityId),
-    queryFn: () => listAppointments(client, entityId),
+    queryKey,
+    queryFn: () => listAppointmentsWithRelations(client, entityId, options),
   });
 }
 
