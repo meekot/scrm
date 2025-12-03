@@ -1,9 +1,8 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
+import { Supabase } from '@/shared/supabase';
 import type { Database } from '@/shared/supabase/types';
 
 export type AppointmentStatus = Database['public']['Enums']['status'];
 
-export type Supabase = SupabaseClient<Database>;
 
 export async function getEntityTableCount(
   table: 'clients' | 'services',
