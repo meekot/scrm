@@ -1,12 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '@/shared/supabase/types';
+import type { Supabase, AppointmentStatus } from '@/shared/supabase';
 import { queryKeys } from '@/shared/lib/queryKeys';
 import { listAppointmentsWithRelations, type ListAppointmentsOptions } from './queries';
 import { createAppointment, updateAppointment, updateAppointmentStatus } from './mutations';
 import type { AppointmentInput } from './schemas';
-
-type Supabase = SupabaseClient<Database>;
 
 export function useAppointments(client: Supabase, entityId: string, options?: ListAppointmentsOptions) {
   const queryKey = [
@@ -52,7 +49,7 @@ export function useUpdateAppointment(client: Supabase, entityId: string) {
 export function useUpdateAppointmentStatus(client: Supabase, entityId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, status }: { id: string; status: Database['public']['Enums']['status'] }) =>
+    mutationFn: ({ id, status }: { id: string; status: AppointmentStatus }) =>
       updateAppointmentStatus(client, entityId, id, status),
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: queryKeys.appointments.all(entityId) });

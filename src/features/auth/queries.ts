@@ -1,7 +1,6 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '@/shared/supabase/types';
+import type { Supabase } from '@/shared/supabase';
 
-export async function getUser(supabase: SupabaseClient<Database>) {
+export async function getUser(supabase: Supabase) {
   const {
     data: { user },
     error,
@@ -11,7 +10,7 @@ export async function getUser(supabase: SupabaseClient<Database>) {
   return user;
 }
 
-export async function getSession(supabase: SupabaseClient<Database>) {
+export async function getSession(supabase: Supabase) {
   const {
     data: { session },
     error,

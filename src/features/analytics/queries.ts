@@ -1,7 +1,4 @@
-import { Supabase } from '@/shared/supabase';
-import type { Database } from '@/shared/supabase/types';
-
-export type AppointmentStatus = Database['public']['Enums']['status'];
+import type { AppointmentStatus, Supabase } from '@/shared/supabase';
 
 
 export async function getEntityTableCount(

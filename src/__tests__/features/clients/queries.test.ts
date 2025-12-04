@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '@/shared/supabase/types';
+import type { Supabase } from '@/shared/supabase';
 import { listClients } from '@/features/clients/queries';
 import type { ClientWithStats } from '@/features/clients/queries';
 
@@ -14,7 +13,7 @@ const createListClientsMock = (orderResult: QueryResult) => {
   const eq = vi.fn((column: string, value: string) => ({ order }));
   const select = vi.fn((query: string) => ({ eq }));
   const from = vi.fn((table: string) => ({ select }));
-  const client = { from } as unknown as SupabaseClient<Database>;
+  const client = { from } as unknown as Supabase;
 
   return { order, eq, select, from, client };
 };

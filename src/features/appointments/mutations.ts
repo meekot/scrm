@@ -1,8 +1,5 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '@/shared/supabase/types';
+import type { Supabase, AppointmentStatus } from '@/shared/supabase';
 import type { AppointmentInput } from './schemas';
-
-type Supabase = SupabaseClient<Database>;
 
 export async function createAppointment(client: Supabase, entityId: string, input: AppointmentInput) {
   const { data, error } = await client
@@ -55,7 +52,7 @@ export async function updateAppointmentStatus(
   client: Supabase,
   entityId: string,
   id: string,
-  status: Database['public']['Enums']['status']
+  status: AppointmentStatus
 ) {
   const { data, error } = await client
     .from('appointments')

@@ -3,8 +3,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useWatch } from 'react-hook-form';
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '@/shared/supabase/types';
+import type { Supabase } from '@/shared/supabase';
 import { formatCurrency } from '@/shared/lib/formatters';
 import { appointmentInputSchema, type AppointmentInput } from '../schemas';
 import { useCreateAppointment, useUpdateAppointment } from '../hooks';
@@ -23,8 +22,6 @@ import { InputPhone } from '@/shared/ui/input-phone';
 import { isValidPhoneNumber } from 'react-phone-number-input';
 import { format } from 'date-fns';
 import { cn } from '@/shared/lib/utils';
-
-type Supabase = SupabaseClient<Database>;
 
 type Props = {
   client: Supabase;

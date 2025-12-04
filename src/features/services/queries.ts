@@ -1,7 +1,4 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '@/shared/supabase/types';
-
-type Supabase = SupabaseClient<Database>;
+import type { Supabase } from '@/shared/supabase';
 
 export async function listServices(client: Supabase, entityId: string) {
   const { data, error } = await client

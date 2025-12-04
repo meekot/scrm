@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '@/shared/supabase/types';
+import type { Supabase } from '@/shared/supabase';
 import { createService, updateService, deleteService } from '@/features/services/mutations';
 
 describe('services mutations', () => {
@@ -9,7 +8,7 @@ describe('services mutations', () => {
     const select = vi.fn(() => ({ single }));
     const insert = vi.fn(() => ({ select, single }));
     const from = vi.fn(() => ({ insert }));
-    const client = { from } as unknown as SupabaseClient<Database>;
+    const client = { from } as unknown as Supabase;
 
     const result = await createService(client, 'entity-1', {
       name: 'Haircut',
@@ -38,7 +37,7 @@ describe('services mutations', () => {
     const eqEntity = vi.fn(() => ({ eq: eqId }));
     const update = vi.fn(() => ({ eq: eqEntity }));
     const from = vi.fn(() => ({ update }));
-    const client = { from } as unknown as SupabaseClient<Database>;
+    const client = { from } as unknown as Supabase;
 
     const result = await updateService(client, 'entity-1', 'svc-1', {
       name: 'Updated',
@@ -76,7 +75,7 @@ describe('services mutations', () => {
       }
       return { delete: remove };
     });
-    const client = { from } as unknown as SupabaseClient<Database>;
+    const client = { from } as unknown as Supabase;
 
     const result = await deleteService(client, 'entity-1', 'svc-1');
 
@@ -92,7 +91,7 @@ describe('services mutations', () => {
     const select = vi.fn(() => ({ single }));
     const insert = vi.fn(() => ({ select, single }));
     const from = vi.fn(() => ({ insert }));
-    const client = { from } as unknown as SupabaseClient<Database>;
+    const client = { from } as unknown as Supabase;
 
     await expect(
       createService(client, 'entity-1', { name: 'x', price: undefined, duration: undefined, description: undefined })
@@ -114,7 +113,7 @@ describe('services mutations', () => {
       }
       return { delete: vi.fn() };
     });
-    const client = { from } as unknown as SupabaseClient<Database>;
+    const client = { from } as unknown as Supabase;
 
     await expect(deleteService(client, 'entity-1', 'svc-1')).rejects.toThrow(
       'Cannot delete service that is used in appointments.'
@@ -138,7 +137,7 @@ describe('services mutations', () => {
       }
       return { delete: deleteFn };
     });
-    const client = { from } as unknown as SupabaseClient<Database>;
+    const client = { from } as unknown as Supabase;
 
     const result = await deleteService(client, 'entity-1', 'svc-1');
 

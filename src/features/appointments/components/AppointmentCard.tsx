@@ -6,10 +6,8 @@ import { formatCurrency, formatDate, formatTime } from '@/shared/lib/formatters'
 import { Button } from '@/shared/ui/button';
 import { Badge } from '@/shared/ui/badge';
 import { cn } from '@/shared/lib/utils';
+import type { AppointmentStatus } from '@/shared/supabase';
 import type { AppointmentWithRelations } from '../queries';
-import type { Database } from '@/shared/supabase/types';
-
-type AppointmentStatus = Database['public']['Enums']['status'];
 
 type Props = {
   appointment: AppointmentWithRelations;

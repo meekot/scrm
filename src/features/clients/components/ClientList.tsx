@@ -1,8 +1,7 @@
 "use client";
 
 import { useMemo, useState } from 'react';
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '@/shared/supabase/types';
+import type { Supabase } from '@/shared/supabase';
 import type { ClientWithStats } from '../queries';
 import { useClients, useDeleteClient } from '../hooks';
 import { formatCurrency, formatDate, formatDateTime } from '@/shared/lib/formatters';
@@ -20,8 +19,6 @@ import {
   DialogTitle,
 } from '@/shared/ui/dialog';
 import { ClientForm } from './ClientForm';
-
-type Supabase = SupabaseClient<Database>;
 type ClientListProps = {
   client: Supabase;
   entityId: string;
@@ -268,7 +265,10 @@ function ClientCard({
 }
 
 function getTotalSpent(client: ClientWithStats) {
-  return (client.appointments ?? []).reduce((sum, app) => sum + (Number(app.price) || 0), 0);
+  return (client.appointments ?? []).reduce<number>(
+    (sum, app) => sum + (Number(app.price ?? 0) || 0),
+    0
+  );
 }
 
 function getLastAppointmentDate(client: ClientWithStats) {

@@ -135,9 +135,14 @@ test('user can create, edit, and delete a service', async ({ page }) => {
   await dialog.getByLabel(/description/i).fill('Updated description');
   await dialog.getByRole('button', { name: /save changes/i }).click();
 
-  await expect(page.getByText(/updated service/i)).toBeVisible({ timeout: 10000 });
+  // Wait for dialog to close
+  await expect(dialog).not.toBeVisible({ timeout: 5000 });
+
+  // Verify the service card shows updated information
+  await expect(page.getByText(/updated service/i).first()).toBeVisible({ timeout: 10000 });
   await expect(page.getByText(/90 min/)).toBeVisible();
-  await expect(page.getByText(/updated description/i)).toBeVisible();
+  // Use locator within main content to avoid matching the dialog
+  await expect(page.locator('main').getByText(/updated description/i)).toBeVisible();
 
   // Delete service
   await page.getByRole('button', { name: /delete updated service/i }).click();

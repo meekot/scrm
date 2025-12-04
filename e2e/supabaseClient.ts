@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import type { Database } from '../src/shared/supabase/types';
+import type { Database } from '@/shared/supabase';
 
 type AdminClientOptions = {
   supabaseUrl?: string;

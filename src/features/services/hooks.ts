@@ -1,13 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { SupabaseClient } from '@supabase/supabase-js';
 import { useMemo } from 'react';
-import type { Database } from '@/shared/supabase/types';
+import type { Supabase } from '@/shared/supabase';
 import { queryKeys } from '@/shared/lib/queryKeys';
 import { listServices } from './queries';
 import { createService, deleteService, updateService } from './mutations';
 import type { ServiceInput } from './schemas';
-
-type Supabase = SupabaseClient<Database>;
 
 export function useServices(client: Supabase, entityId: string) {
   return useQuery({

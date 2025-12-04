@@ -3,7 +3,6 @@ export {
   getAppointmentsDateRangeCount,
   getAppointmentsRevenueTotal,
   getEntityTableCount,
-  type Supabase,
 } from './queries';
 export {
   useAppointmentsDateRangeCount,

@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { Supabase } from '@/shared/supabase';
 import { signIn } from '@/features/auth/actions';
-import type { Database } from '@/shared/supabase/types';
 
 // Mock Next.js functions
 vi.mock('next/navigation', () => ({
@@ -85,7 +84,7 @@ describe('auth actions', () => {
           auth: {
             signInWithPassword: mockSignIn,
           },
-        } as unknown as SupabaseClient<Database>
+        } as unknown as Supabase
       );
 
       const formData = new FormData();
@@ -112,7 +111,7 @@ describe('auth actions', () => {
           auth: {
             signInWithPassword: mockSignIn,
           },
-        } as unknown as SupabaseClient<Database>
+        } as unknown as Supabase
       );
 
       const formData = new FormData();
@@ -133,7 +132,7 @@ describe('auth actions', () => {
           auth: {
             signInWithPassword: mockSignIn,
           },
-        } as unknown as SupabaseClient<Database>
+        } as unknown as Supabase
       );
 
       const formData = new FormData();

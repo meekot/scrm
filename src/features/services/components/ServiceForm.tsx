@@ -9,12 +9,9 @@ import { Input } from '@/shared/ui/input';
 import type { ServiceInput } from '../schemas';
 import { serviceInputSchema } from '../schemas';
 import { useCreateService, useUpdateService } from '../hooks';
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '@/shared/supabase/types';
+import type { Supabase } from '@/shared/supabase';
 import { Textarea } from '@/shared/ui/textarea';
 import { InputCurrency } from '@/shared/ui/input-currency';
-
-type Supabase = SupabaseClient<Database>;
 
 type ServiceFormProps = {
   client: Supabase;

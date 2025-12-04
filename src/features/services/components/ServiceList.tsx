@@ -2,8 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { Pencil, Trash2 } from 'lucide-react';
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '@/shared/supabase/types';
+import type { Supabase, Service } from '@/shared/supabase';
 import { formatCurrency } from '@/shared/lib/formatters';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Button } from '@/shared/ui/button';
@@ -13,15 +12,10 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/shared/ui/dialog';
 import { Separator } from '@/shared/ui/separator';
 import { useServices, useDeleteService } from '../hooks';
-import type { Tables } from '@/shared/supabase/types';
 import { ServiceForm } from './ServiceForm';
-
-type Supabase = SupabaseClient<Database>;
-type Service = Tables<'services'>;
 
 type ServiceListProps = {
   client: Supabase;
@@ -40,7 +34,7 @@ export function ServiceList({ client, entityId }: ServiceListProps) {
     <div className="space-y-3">
       {deleteError ? <p className="text-sm text-destructive">{deleteError}</p> : null}
 
-      <_ServiceList client={client} entityId={entityId} setEditingService={setEditingService}  setDeleting={(id) => {
+      <ServiceListInternal client={client} entityId={entityId} setEditingService={setEditingService}  setDeleting={(id) => {
         setDeleteError(null)
         setPendingDelete(id)
       }} isDeleting={!!pendingDelete} />
@@ -107,7 +101,7 @@ export function ServiceList({ client, entityId }: ServiceListProps) {
 }
 
 
-function _ServiceList({ client, entityId, setEditingService, setDeleting, isDeleting }: ServiceListProps & { setDeleting: (id: string) => void, isDeleting: boolean, setEditingService: (service: Service) => void }) {
+function ServiceListInternal({ client, entityId, setEditingService, setDeleting, isDeleting }: ServiceListProps & { setDeleting: (id: string) => void, isDeleting: boolean, setEditingService: (service: Service) => void }) {
   const { data, isLoading, isError, error } = useServices(client, entityId);
 
   const services = useMemo(() => data ?? [], [data]);

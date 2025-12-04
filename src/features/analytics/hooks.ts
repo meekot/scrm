@@ -4,9 +4,8 @@ import {
   getAppointmentsDateRangeCount,
   getAppointmentsRevenueTotal,
   getEntityTableCount,
-  type AppointmentStatus,
-  type Supabase,
 } from './queries';
+import type { AppointmentStatus, Supabase } from '@/shared/supabase';
 
 export function useClientsCount(client: Supabase, entityId: string) {
   return useQuery({

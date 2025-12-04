@@ -1,12 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '@/shared/supabase/types';
+import type { Supabase } from '@/shared/supabase';
 import { queryKeys } from '@/shared/lib/queryKeys';
 import { listClients } from './queries';
 import { createClient, deleteClient, updateClient } from './mutations';
 import type { ClientInput } from './schemas';
-
-type Supabase = SupabaseClient<Database>;
 
 export function useClients(client: Supabase, entityId: string) {
   return useQuery({

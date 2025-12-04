@@ -9,7 +9,7 @@ import { Button } from '@/shared/ui/button';
 import { Separator } from '@/shared/ui/separator';
 import { useAppointments, useUpdateAppointmentStatus } from '../hooks';
 import type { AppointmentWithRelations } from '../queries';
-import type { Database } from '@/shared/supabase/types';
+import type { AppointmentStatus } from '@/shared/supabase';
 import { AppointmentCard } from './AppointmentCard';
 import {
   Dialog,
@@ -20,8 +20,6 @@ import {
   DialogTrigger,
 } from '@/shared/ui/dialog';
 import { AppointmentForm } from './AppointmentForm';
-
-type AppointmentStatus = Database['public']['Enums']['status'];
 
 type ViewMode = 'list' | 'calendar';
 

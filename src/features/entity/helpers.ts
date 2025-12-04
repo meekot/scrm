@@ -1,7 +1,6 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '@/shared/supabase/types';
+import type { Supabase } from '@/shared/supabase';
 
-export async function getUserEntities(client: SupabaseClient<Database>, userId: string) {
+export async function getUserEntities(client: Supabase, userId: string) {
   const { data, error } = await client
     .from('entity_members')
     .select('entity_id, role, entity:entity_id(id, name, display_number, created_at)')
@@ -11,7 +10,7 @@ export async function getUserEntities(client: SupabaseClient<Database>, userId: 
   return data;
 }
 
-export async function getEntityById(client: SupabaseClient<Database>, entityId: string) {
+export async function getEntityById(client: Supabase, entityId: string) {
   const { data, error } = await client
     .from('entity')
     .select('*')
@@ -22,11 +21,7 @@ export async function getEntityById(client: SupabaseClient<Database>, entityId: 
   return data;
 }
 
-export async function checkEntityMembership(
-  client: SupabaseClient<Database>,
-  entityId: string,
-  userId: string
-) {
+export async function checkEntityMembership(client: Supabase, entityId: string, userId: string) {
   const { data, error } = await client
     .from('entity_members')
     .select('role')
@@ -45,10 +40,7 @@ export async function checkEntityMembership(
   return data;
 }
 
-export async function resolveDefaultEntity(
-  client: SupabaseClient<Database>,
-  userId: string
-): Promise<string | null> {
+export async function resolveDefaultEntity(client: Supabase, userId: string): Promise<string | null> {
   const entities = await getUserEntities(client, userId);
 
   if (!entities || entities.length === 0) {

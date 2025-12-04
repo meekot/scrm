@@ -1,17 +1,15 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '@/shared/supabase/types';
 import {
   getAppointmentsDateRangeCount,
   getAppointmentsRevenueTotal,
   getEntityTableCount,
-  type Supabase,
 } from '@/features/analytics/queries';
+import type { Supabase } from '@/shared/supabase';
 
 function createSupabaseMock() {
   const select = vi.fn();
   const from = vi.fn(() => ({ select }));
-  const supabase = { from } as unknown as SupabaseClient<Database>;
+  const supabase = { from } as unknown as Supabase;
 
   return { supabase, from, select };
 }
@@ -47,8 +45,8 @@ describe('getAppointmentsDateRangeCount', () => {
     const queryBuilder = {
       lt,
       in: inFn,
-      then: (onFulfilled: (value: { count: number; error: null }) => unknown, onRejected?: (reason: unknown) => unknown) =>
-        Promise.resolve({ count: 3, error: null }).then(onFulfilled, onRejected),
+      then: (onFulfilled: (value: { data: unknown[]; error: null }) => unknown, onRejected?: (reason: unknown) => unknown) =>
+        Promise.resolve({ data: [1, 2, 3], error: null }).then(onFulfilled, onRejected),
     };
     const gte = vi.fn(() => queryBuilder);
     const eq = vi.fn(() => ({ gte }));
@@ -60,7 +58,7 @@ describe('getAppointmentsDateRangeCount', () => {
     });
 
     expect(from).toHaveBeenCalledWith('appointments');
-    expect(select).toHaveBeenCalledWith('id', { count: 'exact', head: true });
+    expect(select).toHaveBeenCalledWith('id');
     expect(eq).toHaveBeenCalledWith('entity_id', 'entity-1');
     expect(gte).toHaveBeenCalledWith('date', '2024-01-01');
     expect(lt).toHaveBeenCalledWith('date', '2024-01-02');
@@ -77,7 +75,8 @@ describe('getAppointmentsRevenueTotal', () => {
     const revenueQueryBuilder = {
       lt,
       in: inFn,
-      single: vi.fn().mockResolvedValue({ data: { total: 250 }, error: null }),
+      then: (onFulfilled: (value: { data: { price: number }[]; error: null }) => unknown, onRejected?: (reason: unknown) => unknown) =>
+        Promise.resolve({ data: [{ price: 100 }, { price: 150 }], error: null }).then(onFulfilled, onRejected),
     };
     const gte = vi.fn(() => revenueQueryBuilder);
     const eq = vi.fn(() => ({ gte }));
@@ -89,7 +88,7 @@ describe('getAppointmentsRevenueTotal', () => {
     });
 
     expect(from).toHaveBeenCalledWith('appointments');
-    expect(select).toHaveBeenCalledWith('total:price.sum()');
+    expect(select).toHaveBeenCalledWith('price');
     expect(eq).toHaveBeenCalledWith('entity_id', 'entity-5');
     expect(gte).toHaveBeenCalledWith('date', '2024-02-01');
     expect(lt).toHaveBeenCalledWith('date', '2024-03-01');
@@ -102,7 +101,8 @@ describe('getAppointmentsRevenueTotal', () => {
     const revenueQueryBuilder = {
       lt: vi.fn(() => revenueQueryBuilder),
       in: vi.fn(() => revenueQueryBuilder),
-      single: vi.fn().mockResolvedValue({ data: null, error: null }),
+      then: (onFulfilled: (value: { data: never[]; error: null }) => unknown, onRejected?: (reason: unknown) => unknown) =>
+        Promise.resolve({ data: [], error: null }).then(onFulfilled, onRejected),
     };
     const gte = vi.fn(() => revenueQueryBuilder);
     const eq = vi.fn(() => ({ gte }));

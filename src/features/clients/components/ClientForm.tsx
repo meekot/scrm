@@ -7,14 +7,11 @@ import { Button } from '@/shared/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form';
 import { Input } from '@/shared/ui/input';
 import { InputPhone } from '@/shared/ui/input-phone';
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '@/shared/supabase/types';
+import type { Supabase } from '@/shared/supabase';
 import { clientInputSchema, type ClientInput } from '../schemas';
 import { useCreateClient, useUpdateClient } from '../hooks';
 import { useToast } from '@/shared/ui/toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select';
-
-type Supabase = SupabaseClient<Database>;
 
 type ClientFormProps = {
   client: Supabase;

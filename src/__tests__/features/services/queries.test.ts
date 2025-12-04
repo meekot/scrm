@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '@/shared/supabase/types';
+import type { Supabase } from '@/shared/supabase';
 import { listServices } from '@/features/services/queries';
 
 describe('services queries', () => {
@@ -9,7 +8,7 @@ describe('services queries', () => {
     const eq = vi.fn(() => ({ order }));
     const select = vi.fn(() => ({ eq, order }));
     const from = vi.fn(() => ({ select }));
-    const client = { from } as unknown as SupabaseClient<Database>;
+    const client = { from } as unknown as Supabase;
 
     const result = await listServices(client, 'entity-1');
 
@@ -25,7 +24,7 @@ describe('services queries', () => {
     const eq = vi.fn(() => ({ order }));
     const select = vi.fn(() => ({ eq, order }));
     const from = vi.fn(() => ({ select }));
-    const client = { from } as unknown as SupabaseClient<Database>;
+    const client = { from } as unknown as Supabase;
 
     await expect(listServices(client, 'entity-1')).rejects.toThrow('fail');
   });

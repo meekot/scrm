@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '@/shared/supabase/types';
+import type { Supabase } from '@/shared/supabase';
 import { deleteClient } from '@/features/clients/mutations';
 
 describe('clients mutations', () => {
@@ -19,7 +18,7 @@ describe('clients mutations', () => {
       }
       return { delete: vi.fn() };
     });
-    const client = { from } as unknown as SupabaseClient<Database>;
+    const client = { from } as unknown as Supabase;
 
     await expect(deleteClient(client, 'entity-1', 'client-1')).rejects.toThrow(
       'Cannot delete client that has appointments.'
@@ -42,7 +41,7 @@ describe('clients mutations', () => {
       }
       return { delete: deleteFn };
     });
-    const client = { from } as unknown as SupabaseClient<Database>;
+    const client = { from } as unknown as Supabase;
 
     const result = await deleteClient(client, 'entity-1', 'client-1');
 

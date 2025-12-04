@@ -1,9 +1,6 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '@/shared/supabase/types';
+import type { Appointment, Supabase } from '@/shared/supabase';
 
-type Supabase = SupabaseClient<Database>;
-
-export type AppointmentWithRelations = Database['public']['Tables']['appointments']['Row'] & {
+export type AppointmentWithRelations = Appointment & {
   clients: {
     id: string;
     name: string;

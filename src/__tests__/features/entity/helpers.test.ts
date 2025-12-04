@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '@/shared/supabase/types';
+import type { Supabase } from '@/shared/supabase';
 import {
   getUserEntities,
   getEntityById,
@@ -27,7 +26,7 @@ describe('entity helpers', () => {
       const eq = vi.fn().mockResolvedValue({ data: mockData, error: null });
       const select = vi.fn(() => ({ eq }));
       const from = vi.fn(() => ({ select }));
-      const client = { from } as unknown as SupabaseClient<Database>;
+      const client = { from } as unknown as Supabase;
 
       const result = await getUserEntities(client, 'user-1');
 
@@ -43,7 +42,7 @@ describe('entity helpers', () => {
       const eq = vi.fn().mockResolvedValue({ data: null, error: new Error('DB error') });
       const select = vi.fn(() => ({ eq }));
       const from = vi.fn(() => ({ select }));
-      const client = { from } as unknown as SupabaseClient<Database>;
+      const client = { from } as unknown as Supabase;
 
       await expect(getUserEntities(client, 'user-1')).rejects.toThrow('DB error');
     });
@@ -62,7 +61,7 @@ describe('entity helpers', () => {
       const eq = vi.fn(() => ({ single }));
       const select = vi.fn(() => ({ eq }));
       const from = vi.fn(() => ({ select }));
-      const client = { from } as unknown as SupabaseClient<Database>;
+      const client = { from } as unknown as Supabase;
 
       const result = await getEntityById(client, 'entity-1');
 
@@ -78,7 +77,7 @@ describe('entity helpers', () => {
       const eq = vi.fn(() => ({ single }));
       const select = vi.fn(() => ({ eq }));
       const from = vi.fn(() => ({ select }));
-      const client = { from } as unknown as SupabaseClient<Database>;
+      const client = { from } as unknown as Supabase;
 
       await expect(getEntityById(client, 'entity-1')).rejects.toThrow('Not found');
     });
@@ -93,7 +92,7 @@ describe('entity helpers', () => {
       const eq1 = vi.fn(() => ({ eq: eq2 }));
       const select = vi.fn(() => ({ eq: eq1 }));
       const from = vi.fn(() => ({ select }));
-      const client = { from } as unknown as SupabaseClient<Database>;
+      const client = { from } as unknown as Supabase;
 
       const result = await checkEntityMembership(client, 'entity-1', 'user-1');
 
@@ -111,7 +110,7 @@ describe('entity helpers', () => {
       const eq1 = vi.fn(() => ({ eq: eq2 }));
       const select = vi.fn(() => ({ eq: eq1 }));
       const from = vi.fn(() => ({ select }));
-      const client = { from } as unknown as SupabaseClient<Database>;
+      const client = { from } as unknown as Supabase;
 
       const result = await checkEntityMembership(client, 'entity-1', 'user-1');
 
@@ -125,7 +124,7 @@ describe('entity helpers', () => {
       const eq1 = vi.fn(() => ({ eq: eq2 }));
       const select = vi.fn(() => ({ eq: eq1 }));
       const from = vi.fn(() => ({ select }));
-      const client = { from } as unknown as SupabaseClient<Database>;
+      const client = { from } as unknown as Supabase;
 
       await expect(checkEntityMembership(client, 'entity-1', 'user-1')).rejects.toThrow();
     });
@@ -136,7 +135,7 @@ describe('entity helpers', () => {
       const eq = vi.fn().mockResolvedValue({ data: [], error: null });
       const select = vi.fn(() => ({ eq }));
       const from = vi.fn(() => ({ select }));
-      const client = { from } as unknown as SupabaseClient<Database>;
+      const client = { from } as unknown as Supabase;
 
       const result = await resolveDefaultEntity(client, 'user-1');
 
@@ -160,7 +159,7 @@ describe('entity helpers', () => {
       const eq = vi.fn().mockResolvedValue({ data: mockData, error: null });
       const select = vi.fn(() => ({ eq }));
       const from = vi.fn(() => ({ select }));
-      const client = { from } as unknown as SupabaseClient<Database>;
+      const client = { from } as unknown as Supabase;
 
       const result = await resolveDefaultEntity(client, 'user-1');
 
@@ -194,7 +193,7 @@ describe('entity helpers', () => {
       const eq = vi.fn().mockResolvedValue({ data: mockData, error: null });
       const select = vi.fn(() => ({ eq }));
       const from = vi.fn(() => ({ select }));
-      const client = { from } as unknown as SupabaseClient<Database>;
+      const client = { from } as unknown as Supabase;
 
       const result = await resolveDefaultEntity(client, 'user-1');
 
@@ -205,7 +204,7 @@ describe('entity helpers', () => {
       const eq = vi.fn().mockResolvedValue({ data: null, error: null });
       const select = vi.fn(() => ({ eq }));
       const from = vi.fn(() => ({ select }));
-      const client = { from } as unknown as SupabaseClient<Database>;
+      const client = { from } as unknown as Supabase;
 
       const result = await resolveDefaultEntity(client, 'user-1');
 
