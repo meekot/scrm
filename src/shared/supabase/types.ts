@@ -289,6 +289,29 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      list_clients_with_stats: {
+        Args: {
+          entity_id: string
+          limit_count?: number
+          offset_count?: number
+          search_query?: string | null
+          sort_by?: string
+        }
+        Returns: {
+          appointment_count: number
+          created_at: string
+          display_number: number
+          entity_id: string
+          id: string
+          instagram: string | null
+          last_appointment_at: string | null
+          lead_source: string | null
+          name: string
+          phone: string | null
+          total_spent: number
+          updated_at: string
+        }[]
+      }
       get_service_gain: {
         Args: { entity_id: string }
         Returns: {

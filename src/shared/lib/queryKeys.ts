@@ -10,6 +10,8 @@ export const queryKeys = {
   clients: {
     all: (entityId: string) => ['clients', entityId] as const,
     byId: (entityId: string, id: string) => ['clients', entityId, id] as const,
+    list: (entityId: string, search: string, sortBy: string) =>
+      ['clients', entityId, 'list', search, sortBy] as const,
   },
 
   // Services

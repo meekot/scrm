@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Supabase } from '@/shared/supabase';
 import type { ClientWithStats } from '../queries';
-import { useClients, useDeleteClient } from '../hooks';
+import type { ClientSort } from '../queries';
+import { useDeleteClient, useInfiniteClients } from '../hooks';
 import { formatCurrency, formatDate, formatDateTime } from '@/shared/lib/formatters';
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card';
 import { Separator } from '@/shared/ui/separator';
@@ -25,73 +26,52 @@ type ClientListProps = {
 };
 
 export function ClientList({ client, entityId }: ClientListProps) {
-  const { data, isLoading, isError, error } = useClients(client, entityId);
   const deleteMutation = useDeleteClient(client, entityId);
-  const clients = useMemo(() => (data as ClientWithStats[]) ?? [], [data]);
   const [editingClient, setEditingClient] = useState<ClientWithStats | null>(null);
   const [pendingDelete, setPendingDelete] = useState<ClientWithStats | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
-  const [sortBy, setSortBy] = useState<
-    'created_desc' | 'display_asc' | 'last_appointment_desc' | 'appointment_count_desc' | 'spent_desc'
-  >('created_desc');
+  const [sortBy, setSortBy] = useState<ClientSort>('created_desc');
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  const normalizedSearch = search.trim();
 
-  if (isLoading) {
-    return <p className="text-sm text-muted-foreground">Loading clients...</p>;
-  }
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteClients(client, entityId, { search: normalizedSearch, sortBy });
 
-  if (isError) {
-    return (
-      <p className="text-sm text-destructive">
-        {error instanceof Error ? error.message : 'Failed to load clients'}
-      </p>
+  const clients = useMemo(
+    () => (data?.pages.flat() as ClientWithStats[]) ?? [],
+    [data?.pages]
+  );
+
+  useEffect(() => {
+    if (!hasNextPage) return;
+    const node = loadMoreRef.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: '200px' }
     );
-  }
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
-  if (!clients.length) {
-    return <p className="text-sm text-muted-foreground">No clients yet. Add your first one.</p>;
-  }
-
-  const filtered = clients.filter((clientItem) => {
-    const query = search.toLowerCase();
-    if (!query) return true;
-    return (
-      clientItem.name.toLowerCase().includes(query) ||
-      (clientItem.phone ?? '').toLowerCase().includes(query) ||
-      clientItem.display_number.toString().includes(query) ||
-      (clientItem.instagram ?? '').toLowerCase().includes(query)
-    );
-  });
-
-  const sorted = filtered.sort((a, b) => {
-    const lastA = getLastAppointmentDate(a);
-    const lastB = getLastAppointmentDate(b);
-    const countA = a.appointments?.length ?? 0;
-    const countB = b.appointments?.length ?? 0;
-    const spentA = getTotalSpent(a);
-    const spentB = getTotalSpent(b);
-    switch (sortBy) {
-      case 'display_asc':
-        return a.display_number - b.display_number;
-      case 'last_appointment_desc':
-        if (lastA && lastB) return lastB - lastA;
-        if (lastA) return -1;
-        if (lastB) return 1;
-        return 0;
-      case 'appointment_count_desc':
-        return countB - countA;
-      case 'spent_desc':
-        return spentB - spentA;
-      case 'created_desc':
-      default:
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-    }
-  });
+  const isInitialLoading = isLoading && !clients.length;
 
   return (
     <div className="space-y-3">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-muted-foreground">Total clients: {clients.length}</p>
+        <p className="text-sm text-muted-foreground">Loaded clients: {clients.length}</p>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           <Input
             placeholder="Search by name, phone, number, instagram"
@@ -117,17 +97,30 @@ export function ClientList({ client, entityId }: ClientListProps) {
         </div>
       </div>
 
-      {sorted.map((clientItem) => (
-        <ClientCard
-          key={clientItem.id}
-          client={clientItem}
-          onEdit={() => setEditingClient(clientItem)}
-          onDelete={() => {
-            setDeleteError(null);
-            setPendingDelete(clientItem);
-          }}
-        />
-      ))}
+      {isError ? (
+        <p className="text-sm text-destructive">
+          {error instanceof Error ? error.message : 'Failed to load clients'}
+        </p>
+      ) : null}
+      {isInitialLoading ? (
+        <p className="text-sm text-muted-foreground">Loading clients...</p>
+      ) : null}
+      {!isInitialLoading && !isError && !clients.length ? (
+        <p className="text-sm text-muted-foreground">No clients yet. Add your first one.</p>
+      ) : null}
+      {!isInitialLoading && !isError
+        ? clients.map((clientItem) => (
+            <ClientCard
+              key={clientItem.id}
+              client={clientItem}
+              onEdit={() => setEditingClient(clientItem)}
+              onDelete={() => {
+                setDeleteError(null);
+                setPendingDelete(clientItem);
+              }}
+            />
+          ))
+        : null}
       {deleteError ? <p className="text-sm text-destructive">{deleteError}</p> : null}
 
       <Dialog open={Boolean(editingClient)} onOpenChange={(open) => !open && setEditingClient(null)}>
@@ -187,6 +180,14 @@ export function ClientList({ client, entityId }: ClientListProps) {
           </div>
         </DialogContent>
       </Dialog>
+
+      {!isError ? <div ref={loadMoreRef} /> : null}
+      {isFetchingNextPage ? (
+        <p className="text-sm text-muted-foreground">Loading more clients...</p>
+      ) : null}
+      {!hasNextPage && clients.length ? (
+        <p className="text-sm text-muted-foreground">All clients loaded.</p>
+      ) : null}
     </div>
   );
 }
@@ -203,9 +204,9 @@ function ClientCard({
   const instaHandle = client.instagram?.startsWith('@')
     ? client.instagram.slice(1)
     : client.instagram ?? '';
-  const appointmentCount = client.appointments?.length ?? 0;
-  const totalSpent = getTotalSpent(client);
-  const lastAppointment = getLastAppointmentDate(client);
+  const appointmentCount = client.appointment_count ?? 0;
+  const totalSpent = client.total_spent ?? 0;
+  const lastAppointment = client.last_appointment_at;
 
   return (
     <Card>
@@ -262,17 +263,4 @@ function ClientCard({
     
     </Card>
   );
-}
-
-function getTotalSpent(client: ClientWithStats) {
-  return (client.appointments ?? []).reduce<number>(
-    (sum, app) => sum + (Number(app.price ?? 0) || 0),
-    0
-  );
-}
-
-function getLastAppointmentDate(client: ClientWithStats) {
-  return (client.appointments ?? [])
-    .map((app) => new Date(`${app.date}T${app.time ?? '00:00'}`).getTime())
-    .sort((a, b) => b - a)[0];
 }

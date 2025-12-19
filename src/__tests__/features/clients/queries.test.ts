@@ -1,135 +1,50 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { Supabase } from '@/shared/supabase';
 import { listClients } from '@/features/clients/queries';
-import type { ClientWithStats } from '@/features/clients/queries';
-
-type QueryResult = {
-  data: ClientWithStats[] | null;
-  error: Error | null;
-};
-
-const createListClientsMock = (orderResult: QueryResult) => {
-  const order = vi.fn(async () => orderResult);
-  const eq = vi.fn((column: string, value: string) => ({ order }));
-  const select = vi.fn((query: string) => ({ eq }));
-  const from = vi.fn((table: string) => ({ select }));
-  const client = { from } as unknown as Supabase;
-
-  return { order, eq, select, from, client };
-};
 
 describe('clients queries', () => {
   describe('listClients', () => {
-    it('fetches clients with nested appointments data', async () => {
-      const mockData = [
-        {
-          id: 'client-1',
-          name: 'John Doe',
-          phone: '+33612345678',
-          instagram: '@johndoe',
-          lead_source: null,
-          display_number: 1,
-          entity_id: 'entity-1',
-          created_at: '2025-01-01T00:00:00Z',
-          updated_at: '2025-01-01T00:00:00Z',
-          appointments: [
-            {
-              id: 'appt-1',
-              service_id: 'service-1',
-              price: 50,
-              date: '2025-01-15',
-              time: '10:00',
-              created_at: '2025-01-01T00:00:00Z',
-            },
-          ],
-        },
-        {
-          id: 'client-2',
-          name: 'Jane Smith',
-          phone: '+33687654321',
-          instagram: null,
-          lead_source: 'instagram',
-          display_number: 2,
-          entity_id: 'entity-1',
-          created_at: '2025-01-02T00:00:00Z',
-          updated_at: '2025-01-02T00:00:00Z',
-          appointments: [],
-        },
-      ];
-
-      const { order, eq, select, from, client } = createListClientsMock({
-        data: mockData,
-        error: null,
-      });
+    it('calls RPC with default params', async () => {
+      const rpc = vi.fn().mockResolvedValue({ data: [{ id: '1' }], error: null });
+      const client = { rpc } as unknown as Supabase;
 
       const result = await listClients(client, 'entity-1');
 
-      expect(from).toHaveBeenCalledWith('clients');
-      expect(select).toHaveBeenCalledWith(expect.stringContaining('id'));
-      expect(select).toHaveBeenCalledWith(expect.stringContaining('name'));
-      expect(select).toHaveBeenCalledWith(expect.stringContaining('appointments:appointments'));
-      expect(eq).toHaveBeenCalledWith('entity_id', 'entity-1');
-      expect(order).toHaveBeenCalledWith('created_at', { ascending: false });
-      expect(result).toEqual(mockData);
+      expect(rpc).toHaveBeenCalledWith('list_clients_with_stats', {
+        entity_id: 'entity-1',
+        search_query: '',
+        sort_by: 'created_desc',
+        limit_count: 20,
+        offset_count: 0,
+      });
+      expect(result).toEqual([{ id: '1' }]);
     });
 
-    it('returns empty array when no clients exist', async () => {
-      const { client } = createListClientsMock({ data: [], error: null });
+    it('passes search, sort, and pagination params', async () => {
+      const rpc = vi.fn().mockResolvedValue({ data: [], error: null });
+      const client = { rpc } as unknown as Supabase;
 
-      const result = await listClients(client, 'entity-1');
+      await listClients(client, 'entity-1', {
+        search: 'maya',
+        sortBy: 'spent_desc',
+        limit: 10,
+        offset: 20,
+      });
 
-      expect(result).toEqual([]);
+      expect(rpc).toHaveBeenCalledWith('list_clients_with_stats', {
+        entity_id: 'entity-1',
+        search_query: 'maya',
+        sort_by: 'spent_desc',
+        limit_count: 10,
+        offset_count: 20,
+      });
     });
 
     it('throws on Supabase error', async () => {
-      const { client } = createListClientsMock({
-        data: null,
-        error: new Error('DB error'),
-      });
+      const rpc = vi.fn().mockResolvedValue({ data: null, error: new Error('DB error') });
+      const client = { rpc } as unknown as Supabase;
 
       await expect(listClients(client, 'entity-1')).rejects.toThrow('DB error');
-    });
-
-    it('properly scopes query to entity_id', async () => {
-      const { eq, client } = createListClientsMock({ data: [], error: null });
-
-      await listClients(client, 'entity-xyz');
-
-      expect(eq).toHaveBeenCalledWith('entity_id', 'entity-xyz');
-    });
-
-    it('includes all required client fields in select', async () => {
-      const { select, client } = createListClientsMock({ data: [], error: null });
-
-      await listClients(client, 'entity-1');
-
-      expect(select).toHaveBeenCalled();
-      expect(select.mock.calls[0]).toBeDefined();
-      const selectCall = select.mock.calls[0][0] as string;
-      expect(selectCall).toContain('id');
-      expect(selectCall).toContain('name');
-      expect(selectCall).toContain('phone');
-      expect(selectCall).toContain('instagram');
-      expect(selectCall).toContain('lead_source');
-      expect(selectCall).toContain('display_number');
-      expect(selectCall).toContain('entity_id');
-      expect(selectCall).toContain('created_at');
-      expect(selectCall).toContain('updated_at');
-      expect(selectCall).toContain('appointments:appointments');
-    });
-
-    it('includes required appointment fields in nested select', async () => {
-      const { select, client } = createListClientsMock({ data: [], error: null });
-
-      await listClients(client, 'entity-1');
-
-      expect(select).toHaveBeenCalled();
-      expect(select.mock.calls[0]).toBeDefined();
-      const selectCall = select.mock.calls[0][0] as string;
-      expect(selectCall).toContain('service_id');
-      expect(selectCall).toContain('price');
-      expect(selectCall).toContain('date');
-      expect(selectCall).toContain('time');
     });
   });
 });

@@ -1,14 +1,32 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { Supabase } from '@/shared/supabase';
 import { queryKeys } from '@/shared/lib/queryKeys';
+import type { ClientSort } from './queries';
 import { listClients } from './queries';
 import { createClient, deleteClient, updateClient } from './mutations';
 import type { ClientInput } from './schemas';
 
+const CLIENTS_SELECT_LIMIT = 1000;
+
+export function useInfiniteClients(
+  client: Supabase,
+  entityId: string,
+  { search, sortBy, pageSize = 20 }: { search: string; sortBy: ClientSort; pageSize?: number }
+) {
+  return useInfiniteQuery({
+    queryKey: queryKeys.clients.list(entityId, search, sortBy),
+    queryFn: ({ pageParam = 0 }) =>
+      listClients(client, entityId, { search, sortBy, limit: pageSize, offset: pageParam }),
+    getNextPageParam: (lastPage, pages) =>
+      lastPage.length < pageSize ? undefined : pages.length * pageSize,
+    initialPageParam: 0,
+  });
+}
+
 export function useClients(client: Supabase, entityId: string) {
   return useQuery({
     queryKey: queryKeys.clients.all(entityId),
-    queryFn: () => listClients(client, entityId),
+    queryFn: () => listClients(client, entityId, { limit: CLIENTS_SELECT_LIMIT }),
   });
 }
 
