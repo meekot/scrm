@@ -1,5 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/shared/supabase';
+import dotenv from 'dotenv';
+
+dotenv.config({ quiet: true, path: '.env.e2e' });
 
 type AdminClientOptions = {
   supabaseUrl?: string;
