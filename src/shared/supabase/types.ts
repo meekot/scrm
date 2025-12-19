@@ -289,6 +289,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_service_gain: {
+        Args: { entity_id: string }
+        Returns: {
+          service_id: string
+          total_revenue: number
+          appointments_count: number
+        }[]
+      }
       is_member_of_entity: { Args: { eid: string }; Returns: boolean }
       next_scoped_no: {
         Args: { p_eid: string; p_kind: string }
@@ -442,4 +450,3 @@ export const Constants = {
     },
   },
 } as const
-

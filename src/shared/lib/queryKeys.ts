@@ -16,6 +16,7 @@ export const queryKeys = {
   services: {
     all: (entityId: string) => ['services', entityId] as const,
     byId: (entityId: string, id: string) => ['services', entityId, id] as const,
+    gain: (entityId: string) => ['services', entityId, 'gain'] as const,
   },
 
   // Appointments

@@ -14,7 +14,8 @@ import {
   DialogTitle,
 } from '@/shared/ui/dialog';
 import { Separator } from '@/shared/ui/separator';
-import { useServices, useDeleteService } from '../hooks';
+import { useToast } from '@/shared/ui/toast';
+import { useServiceGain, useServices, useDeleteService } from '../hooks';
 import { ServiceForm } from './ServiceForm';
 
 type ServiceListProps = {
@@ -24,20 +25,31 @@ type ServiceListProps = {
 
 export function ServiceList({ client, entityId }: ServiceListProps) {
   const deleteMutation = useDeleteService(client, entityId);
+  const { addToast } = useToast();
   const [editingService, setEditingService] = useState<Service | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const { data: serviceGain, isLoading: gainLoading } = useServiceGain(client, entityId);
 
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
 
+  const gainByServiceId = useMemo(() => {
+    return new Map((serviceGain ?? []).map((entry) => [entry.service_id, entry]));
+  }, [serviceGain]);
 
   return (
     <div className="space-y-3">
-      {deleteError ? <p className="text-sm text-destructive">{deleteError}</p> : null}
-
-      <ServiceListInternal client={client} entityId={entityId} setEditingService={setEditingService}  setDeleting={(id) => {
-        setDeleteError(null)
-        setPendingDelete(id)
-      }} isDeleting={!!pendingDelete} />
+      <ServiceListInternal
+        client={client}
+        entityId={entityId}
+        gainByServiceId={gainByServiceId}
+        gainLoading={gainLoading}
+        setEditingService={setEditingService}
+        setDeleting={(id) => {
+          setDeleteError(null);
+          setPendingDelete(id);
+        }}
+        isDeleting={!!pendingDelete}
+      />
 
       <Dialog open={!!editingService} onOpenChange={(open) => !open && setEditingService(null)}>
         <DialogContent>
@@ -56,7 +68,10 @@ export function ServiceList({ client, entityId }: ServiceListProps) {
               duration: editingService?.duration ?? undefined,
               description: editingService?.description ?? undefined,
             }}
-            onSuccess={() => setEditingService(null)}
+            onSuccess={() => {
+              setEditingService(null);
+              addToast({ title: 'Service updated', description: 'Your changes were saved.' });
+            }}
           />
         </DialogContent>
       </Dialog>
@@ -69,6 +84,7 @@ export function ServiceList({ client, entityId }: ServiceListProps) {
               This action cannot be undone. The service will be removed if it is not linked to any appointments.
             </DialogDescription>
           </DialogHeader>
+          {deleteError ? <p className="text-sm text-destructive">{deleteError}</p> : null}
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => setPendingDelete(null)}>
               Cancel
@@ -82,6 +98,7 @@ export function ServiceList({ client, entityId }: ServiceListProps) {
                 try {
                   await deleteMutation.mutateAsync(pendingDelete);
                   setPendingDelete(null);
+                  addToast({ title: 'Service deleted', description: 'The service was removed.' });
                 } catch (mutationError) {
                   setDeleteError(
                     mutationError instanceof Error
@@ -101,7 +118,21 @@ export function ServiceList({ client, entityId }: ServiceListProps) {
 }
 
 
-function ServiceListInternal({ client, entityId, setEditingService, setDeleting, isDeleting }: ServiceListProps & { setDeleting: (id: string) => void, isDeleting: boolean, setEditingService: (service: Service) => void }) {
+function ServiceListInternal({
+  client,
+  entityId,
+  gainByServiceId,
+  gainLoading,
+  setEditingService,
+  setDeleting,
+  isDeleting,
+}: ServiceListProps & {
+  gainByServiceId: Map<string, { total_revenue: number; appointments_count: number }>;
+  gainLoading: boolean;
+  setDeleting: (id: string) => void;
+  isDeleting: boolean;
+  setEditingService: (service: Service) => void;
+}) {
   const { data, isLoading, isError, error } = useServices(client, entityId);
 
   const services = useMemo(() => data ?? [], [data]);
@@ -129,17 +160,46 @@ function ServiceListInternal({ client, entityId, setEditingService, setDeleting,
 
 
   return services.map((service) => {
-    return (<ServiceListItem key={service.id} service={service} setEditingService={setEditingService} setDeleting={setDeleting} isDeleting={isDeleting} />)
-  })
+    const gainEntry = gainByServiceId.get(service.id);
+    const gainTotal = gainEntry?.total_revenue ?? 0;
+    return (
+      <ServiceListItem
+        key={service.id}
+        service={service}
+        gainLoading={gainLoading}
+        gainTotal={gainTotal}
+        setEditingService={setEditingService}
+        setDeleting={setDeleting}
+        isDeleting={isDeleting}
+      />
+    );
+  });
 }
 
-function ServiceListItem({ service, setEditingService, setDeleting, isDeleting }: { service: Service, setEditingService: (service: Service) => void, setDeleting: (id: string) => void, isDeleting: boolean, }) {
+function ServiceListItem({
+  service,
+  gainLoading,
+  gainTotal,
+  setEditingService,
+  setDeleting,
+  isDeleting,
+}: {
+  service: Service;
+  gainLoading: boolean;
+  gainTotal: number;
+  setEditingService: (service: Service) => void;
+  setDeleting: (id: string) => void;
+  isDeleting: boolean;
+}) {
   return (<Card key={service.id}>
     <CardHeader className="flex flex-row items-center justify-between space-y-0">
       <div>
-        <CardTitle className="text-base"><span className='text-muted-foreground font-base text-xs'>#{service.display_number}</span> {service.name}</CardTitle>
+        <CardTitle className="text-base"><span className='text-muted-foreground font-base'>#{service.display_number}</span> {service.name}</CardTitle>
         <p className="text-sm text-muted-foreground">
           {formatCurrency(service.price)} {service.duration ? `• ${service.duration} min` : ''}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          Gain: {gainLoading ? 'Loading…' : formatCurrency(gainTotal)}
         </p>
       </div>
       <div className="flex items-center gap-2">

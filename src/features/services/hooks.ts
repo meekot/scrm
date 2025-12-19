@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import type { Supabase } from '@/shared/supabase';
 import { queryKeys } from '@/shared/lib/queryKeys';
-import { listServices } from './queries';
+import { getServiceGain, listServices } from './queries';
 import { createService, deleteService, updateService } from './mutations';
 import type { ServiceInput } from './schemas';
 
@@ -10,6 +10,13 @@ export function useServices(client: Supabase, entityId: string) {
   return useQuery({
     queryKey: queryKeys.services.all(entityId),
     queryFn: () => listServices(client, entityId),
+  });
+}
+
+export function useServiceGain(client: Supabase, entityId: string) {
+  return useQuery({
+    queryKey: queryKeys.services.gain(entityId),
+    queryFn: () => getServiceGain(client, entityId),
   });
 }
 
