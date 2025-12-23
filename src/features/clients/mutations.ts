@@ -1,7 +1,22 @@
 import type { Supabase } from '@/shared/supabase';
 import type { ClientInput } from './schemas';
 
+async function ensureUniquePhone(client: Supabase, entityId: string, phone: string, excludeId?: string) {
+  let query = client.from('clients').select('id').eq('entity_id', entityId).eq('phone', phone).limit(1);
+  if (excludeId) {
+    query = query.neq('id', excludeId);
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+  if (data && data.length > 0) {
+    throw new Error('Client phone already exists for this entity.');
+  }
+}
+
 export async function createClient(client: Supabase, entityId: string, input: ClientInput) {
+  await ensureUniquePhone(client, entityId, input.phone);
+
   const { data, error } = await client
     .from('clients')
     .insert({
@@ -43,6 +58,10 @@ export async function updateClient(
   id: string,
   input: Partial<ClientInput>
 ) {
+  if (input.phone) {
+    await ensureUniquePhone(client, entityId, input.phone, id);
+  }
+
   const { data, error } = await client
     .from('clients')
     .update({

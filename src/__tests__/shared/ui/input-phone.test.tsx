@@ -1,7 +1,12 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { InputPhone } from '@/shared/ui/input-phone';
+
+Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
+  value: vi.fn(),
+  writable: true,
+});
 
 describe('InputPhone', () => {
   it('renders phone input with placeholder', () => {
@@ -112,5 +117,42 @@ describe('InputPhone', () => {
     const phoneInput = container.querySelector('.PhoneInput');
     expect(phoneInput).toHaveClass('my-custom-class');
     expect(phoneInput).toHaveClass('flex'); // Default class still present
+  });
+
+  it('opens the country selector popover', async () => {
+    const user = userEvent.setup();
+    render(<InputPhone />);
+
+    await user.click(screen.getByRole('button', { name: /country/i }));
+
+    expect(screen.getByRole('listbox')).toBeInTheDocument();
+  });
+
+  it('parses a pasted national phone number', () => {
+    const onChange = vi.fn();
+    render(<InputPhone onChange={onChange} />);
+    const input = screen.getByLabelText('Phone number');
+
+    fireEvent.paste(input, {
+      clipboardData: {
+        getData: () => '+33 6 12 34 56 78',
+      },
+    });
+
+    expect(onChange).toHaveBeenCalledWith('+33612345678');
+  });
+
+  it('ignores pasted text that is not a possible phone number', () => {
+    const onChange = vi.fn();
+    render(<InputPhone onChange={onChange} />);
+    const input = screen.getByLabelText('Phone number');
+
+    fireEvent.paste(input, {
+      clipboardData: {
+        getData: () => 'not a phone',
+      },
+    });
+
+    expect(onChange).not.toHaveBeenCalled();
   });
 });

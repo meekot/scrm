@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/shared/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/shared/ui/form';
 import { Input } from '@/shared/ui/input';
 import { InputPhone } from '@/shared/ui/input-phone';
 import type { Supabase } from '@/shared/supabase';
@@ -109,8 +109,12 @@ export function ClientForm({
             <FormItem>
               <FormLabel>Instagram</FormLabel>
               <FormControl>
-                <Input placeholder="@username" {...field} />
+                <div className="relative">
+                  <span className="-translate-y-1/2 absolute top-1/2 left-3 text-sm text-muted-foreground">@</span>
+                  <Input className="pl-7" placeholder="username" {...field} />
+                </div>
               </FormControl>
+              <FormDescription>Enter only the nickname (no @ or link).</FormDescription>
               <FormMessage />
             </FormItem>
           )}

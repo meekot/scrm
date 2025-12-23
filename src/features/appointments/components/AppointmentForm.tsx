@@ -255,11 +255,18 @@ export function AppointmentForm({
                     </div>
                     <div className="space-y-2">
                       <label className="text-sm font-medium">Instagram (optional)</label>
-                      <Input
-                        value={newClientInstagram}
-                        onChange={(e) => setNewClientInstagram(e.target.value)}
-                        placeholder="@username"
-                      />
+                      <div className="relative">
+                        <span className="-translate-y-1/2 absolute top-1/2 left-3 text-sm text-muted-foreground">
+                          @
+                        </span>
+                        <Input
+                          className="pl-7"
+                          value={newClientInstagram}
+                          onChange={(e) => setNewClientInstagram(e.target.value)}
+                          placeholder="username"
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground">Enter only the nickname (no @ or link).</p>
                     </div>
                   </div>
                 )
