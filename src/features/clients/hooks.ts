@@ -2,7 +2,7 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tansta
 import type { Supabase } from '@/shared/supabase';
 import { queryKeys } from '@/shared/lib/queryKeys';
 import type { ClientSort } from './queries';
-import { listClients } from './queries';
+import { countClients, listClients } from './queries';
 import { createClient, deleteClient, updateClient } from './mutations';
 import type { ClientInput } from './schemas';
 
@@ -30,11 +30,21 @@ export function useClients(client: Supabase, entityId: string) {
   });
 }
 
+export function useClientsCount(client: Supabase, entityId: string) {
+  return useQuery({
+    queryKey: queryKeys.clients.count(entityId),
+    queryFn: () => countClients(client, entityId),
+  });
+}
+
 export function useCreateClient(client: Supabase, entityId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (input: ClientInput) => createClient(client, entityId, input),
-    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.clients.all(entityId) }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.clients.all(entityId) });
+      qc.invalidateQueries({ queryKey: queryKeys.clients.count(entityId) });
+    },
   });
 }
 
@@ -57,6 +67,7 @@ export function useDeleteClient(client: Supabase, entityId: string) {
     onSuccess: (_data, id) => {
       qc.invalidateQueries({ queryKey: queryKeys.clients.all(entityId) });
       qc.invalidateQueries({ queryKey: queryKeys.clients.byId(entityId, id) });
+      qc.invalidateQueries({ queryKey: queryKeys.clients.count(entityId) });
     },
   });
 }

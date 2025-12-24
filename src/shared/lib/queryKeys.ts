@@ -12,6 +12,7 @@ export const queryKeys = {
     byId: (entityId: string, id: string) => ['clients', entityId, id] as const,
     list: (entityId: string, search: string, sortBy: string) =>
       ['clients', entityId, 'list', search, sortBy] as const,
+    count: (entityId: string) => ['clients', entityId, 'count'] as const,
   },
 
   // Services

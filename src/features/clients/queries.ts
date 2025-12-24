@@ -36,3 +36,13 @@ export async function listClients(
   if (error) throw error;
   return (data ?? []) as ClientWithStats[];
 }
+
+export async function countClients(client: Supabase, entityId: string): Promise<number> {
+  const { count, error } = await client
+    .from('clients')
+    .select('id', { count: 'exact', head: true })
+    .eq('entity_id', entityId);
+
+  if (error) throw error;
+  return count ?? 0;
+}

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Supabase } from '@/shared/supabase';
 import type { ClientWithStats } from '../queries';
 import type { ClientSort } from '../queries';
-import { useDeleteClient, useInfiniteClients } from '../hooks';
+import { useClientsCount, useDeleteClient, useInfiniteClients } from '../hooks';
 import { formatCurrency, formatDate, formatDateTime } from '@/shared/lib/formatters';
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card';
 import { Separator } from '@/shared/ui/separator';
@@ -44,6 +44,11 @@ export function ClientList({ client, entityId }: ClientListProps) {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteClients(client, entityId, { search: normalizedSearch, sortBy });
+  const {
+    data: totalClients,
+    isLoading: isCountLoading,
+    isError: isCountError,
+  } = useClientsCount(client, entityId);
 
   const clients = useMemo(
     () => (data?.pages.flat() as ClientWithStats[]) ?? [],
@@ -71,7 +76,9 @@ export function ClientList({ client, entityId }: ClientListProps) {
   return (
     <div className="space-y-3">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-muted-foreground">Loaded clients: {clients.length}</p>
+        <p className="text-sm text-muted-foreground">
+          Total clients: {isCountLoading ? '...' : isCountError ? '—' : totalClients}
+        </p>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           <Input
             placeholder="Search by name, phone, number, instagram"
