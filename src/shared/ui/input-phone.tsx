@@ -115,7 +115,6 @@ function CountrySelect({
             <span className="bg-muted size-4 rounded-sm" />
           )}
           <span className="max-w-[7.5rem] truncate text-xs font-semibold">{selectedLabel}</span>
-          <span className="text-muted-foreground text-xs">+{selectedCallingCode}</span>
           <ChevronDown className="text-muted-foreground size-4" />
         </button>
       </PopoverTrigger>

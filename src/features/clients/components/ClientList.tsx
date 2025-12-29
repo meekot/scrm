@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Supabase } from '@/shared/supabase';
 import type { ClientWithStats } from '../queries';
 import type { ClientSort } from '../queries';
-import { useClientsCount, useDeleteClient, useInfiniteClients } from '../hooks';
+import { useDeleteClient, useInfiniteClients } from '../hooks';
 import { formatCurrency, formatDate, formatDateTime } from '@/shared/lib/formatters';
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card';
 import { Separator } from '@/shared/ui/separator';
@@ -12,14 +12,7 @@ import { Button } from '@/shared/ui/button';
 import { PhoneCall, Instagram, Pencil, Trash2 } from 'lucide-react';
 import { Input } from '@/shared/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/shared/ui/dialog';
-import { ClientForm } from './ClientForm';
+import { ClientUpsertDialog } from './ClientUpsertDialog';
 type ClientListProps = {
   client: Supabase;
   entityId: string;
@@ -44,11 +37,6 @@ export function ClientList({ client, entityId }: ClientListProps) {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteClients(client, entityId, { search: normalizedSearch, sortBy });
-  const {
-    data: totalClients,
-    isLoading: isCountLoading,
-    isError: isCountError,
-  } = useClientsCount(client, entityId);
 
   const clients = useMemo(
     () => (data?.pages.flat() as ClientWithStats[]) ?? [],
@@ -75,10 +63,7 @@ export function ClientList({ client, entityId }: ClientListProps) {
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-muted-foreground">
-          Total clients: {isCountLoading ? '...' : isCountError ? '—' : totalClients}
-        </p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
           <Input
             placeholder="Search by name, phone, number, instagram"
@@ -130,64 +115,26 @@ export function ClientList({ client, entityId }: ClientListProps) {
         : null}
       {deleteError ? <p className="text-sm text-destructive">{deleteError}</p> : null}
 
-      <Dialog open={Boolean(editingClient)} onOpenChange={(open) => !open && setEditingClient(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit client</DialogTitle>
-            <DialogDescription>Update client details.</DialogDescription>
-          </DialogHeader>
-          {editingClient ? (
-            <ClientForm
-              client={client}
-              entityId={entityId}
-              mode="edit"
-              clientId={editingClient.id}
-              defaultValues={{
+      <ClientUpsertDialog
+        client={client}
+        entityId={entityId}
+        mode="edit"
+        open={Boolean(editingClient)}
+        onOpenChange={(open) => !open && setEditingClient(null)}
+        clientId={editingClient?.id}
+        defaultValues={
+          editingClient
+            ? {
                 name: editingClient.name,
                 phone: editingClient.phone ?? '',
                 instagram: editingClient.instagram ?? '',
                 lead_source: editingClient.lead_source ?? '',
-              }}
-              onSaved={() => setEditingClient(null)}
-            />
-          ) : null}
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={Boolean(pendingDelete)} onOpenChange={(open) => !open && setPendingDelete(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete client?</DialogTitle>
-            <DialogDescription>This action cannot be undone.</DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setPendingDelete(null)}>
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              disabled={deleteMutation.isPending}
-              onClick={async () => {
-                if (!pendingDelete) return;
-                setDeleteError(null);
-                try {
-                  await deleteMutation.mutateAsync(pendingDelete.id);
-                  setPendingDelete(null);
-                } catch (mutationError) {
-                  setDeleteError(
-                    mutationError instanceof Error
-                      ? mutationError.message
-                      : 'Unable to delete client.'
-                  );
-                }
-              }}
-            >
-              Delete
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
+              }
+            : undefined
+        }
+        onSaved={() => setEditingClient(null)}
+      />
+      
       {!isError ? <div ref={loadMoreRef} /> : null}
       {isFetchingNextPage ? (
         <p className="text-sm text-muted-foreground">Loading more clients...</p>
