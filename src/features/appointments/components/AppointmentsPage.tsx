@@ -1,16 +1,11 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from 'react';
-import { useVirtualizer } from '@tanstack/react-virtual';
+import { useMemo, useState } from 'react';
 import { createClient as createBrowserClient } from '@/shared/supabase/client-browser';
 import { useRequiredEntity } from '@/features/entity';
-import { formatDate } from '@/shared/lib/formatters';
 import { Button } from '@/shared/ui/button';
 import { Separator } from '@/shared/ui/separator';
-import { useAppointments, useUpdateAppointmentStatus } from '../hooks';
-import type { AppointmentWithRelations } from '../queries';
-import type { AppointmentStatus } from '@/shared/supabase';
-import { AppointmentCard } from './AppointmentCard';
+import { useAppointments } from '../hooks';
 import {
   Dialog,
   DialogContent,
@@ -20,6 +15,8 @@ import {
   DialogTrigger,
 } from '@/shared/ui/dialog';
 import { AppointmentForm } from './AppointmentForm';
+import { CalendarAppointmentsView } from './CalendarAppointmentsView';
+import { VirtualizedAppointmentList } from './VirtualizedAppointmentList';
 
 type ViewMode = 'list' | 'calendar';
 
@@ -84,117 +81,9 @@ export function AppointmentsPage() {
         view === 'list' ? (
           <VirtualizedAppointmentList appointments={appointments} client={supabase} entityId={entityId} />
         ) : (
-          <CalendarView appointments={appointments} client={supabase} entityId={entityId} />
+          <CalendarAppointmentsView appointments={appointments} client={supabase} entityId={entityId} />
         )
       ) : null}
-    </div>
-  );
-}
-
-function VirtualizedAppointmentList({
-  appointments,
-  client,
-  entityId,
-}: {
-  appointments: AppointmentWithRelations[];
-  client: ReturnType<typeof createBrowserClient>;
-  entityId: string;
-}) {
-  const parentRef = useRef<HTMLDivElement>(null);
-  const updateStatus = useUpdateAppointmentStatus(client, entityId);
-
-  const handleStatusChange = useCallback(
-    (id: string, status: AppointmentStatus) => {
-      updateStatus.mutate({ id, status });
-    },
-    [updateStatus]
-  );
-
-  const rowVirtualizer = useVirtualizer({
-    count: appointments.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 140,
-    overscan: 10,
-    gap: 12,
-  });
-
-  return (
-    <div
-      ref={parentRef}
-      className="h-[calc(100vh-220px)] min-h-[400px] overflow-y-auto"
-    >
-      <div
-        className="relative w-full"
-        style={{ height: `${rowVirtualizer.getTotalSize()}px` }}
-      >
-        {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-          const appt = appointments[virtualRow.index];
-          return (
-            <div
-              key={appt.id}
-              data-index={virtualRow.index}
-              ref={rowVirtualizer.measureElement}
-              className="absolute left-0 top-0 w-full"
-              style={{ transform: `translateY(${virtualRow.start}px)` }}
-            >
-              <AppointmentCard
-                appointment={appt}
-                onStatusChange={handleStatusChange}
-                isUpdating={updateStatus.isPending}
-              />
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function CalendarView({
-  appointments,
-  client,
-  entityId,
-}: {
-  appointments: AppointmentWithRelations[];
-  client: ReturnType<typeof createBrowserClient>;
-  entityId: string;
-}) {
-  const updateStatus = useUpdateAppointmentStatus(client, entityId);
-
-  const handleStatusChange = useCallback(
-    (id: string, status: AppointmentStatus) => {
-      updateStatus.mutate({ id, status });
-    },
-    [updateStatus]
-  );
-
-  const grouped = useMemo(
-    () =>
-      appointments.reduce<Record<string, AppointmentWithRelations[]>>((acc, appt) => {
-        acc[appt.date] = acc[appt.date] ? [...acc[appt.date], appt] : [appt];
-        return acc;
-      }, {}),
-    [appointments]
-  );
-
-  return (
-    <div className="grid gap-4 md:grid-cols-2">
-      {Object.entries(grouped).map(([date, items]) => (
-        <div key={date} className="rounded-lg border p-3">
-          <p className="text-sm font-semibold">{formatDate(date, { dateStyle: 'long' })}</p>
-          <Separator className="my-2" />
-          <div className="space-y-2">
-            {items.map((appt) => (
-              <AppointmentCard
-                key={appt.id}
-                appointment={appt}
-                onStatusChange={handleStatusChange}
-                isUpdating={updateStatus.isPending}
-              />
-            ))}
-          </div>
-        </div>
-      ))}
     </div>
   );
 }
