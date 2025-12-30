@@ -12,6 +12,13 @@ import { Button } from '@/shared/ui/button';
 import { PhoneCall, Instagram, Pencil, Trash2 } from 'lucide-react';
 import { Input } from '@/shared/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/shared/ui/dialog';
 import { ClientUpsertDialog } from './ClientUpsertDialog';
 type ClientListProps = {
   client: Supabase;
@@ -134,7 +141,41 @@ export function ClientList({ client, entityId }: ClientListProps) {
         }
         onSaved={() => setEditingClient(null)}
       />
-      
+
+      <Dialog open={Boolean(pendingDelete)} onOpenChange={(open) => !open && setPendingDelete(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete client?</DialogTitle>
+            <DialogDescription>This action cannot be undone.</DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setPendingDelete(null)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={deleteMutation.isPending}
+              onClick={async () => {
+                if (!pendingDelete) return;
+                setDeleteError(null);
+                try {
+                  await deleteMutation.mutateAsync(pendingDelete.id);
+                  setPendingDelete(null);
+                } catch (mutationError) {
+                  setDeleteError(
+                    mutationError instanceof Error
+                      ? mutationError.message
+                      : 'Unable to delete client.'
+                  );
+                }
+              }}
+            >
+              Delete
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {!isError ? <div ref={loadMoreRef} /> : null}
       {isFetchingNextPage ? (
         <p className="text-sm text-muted-foreground">Loading more clients...</p>

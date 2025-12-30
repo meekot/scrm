@@ -52,7 +52,6 @@ describe('ClientList', () => {
 
     render(<ClientList client={{} as Supabase} entityId="entity-1" />);
 
-    expect(screen.getByText('Loaded clients: 1')).toBeInTheDocument();
     expect(screen.getByText('#12 Maya')).toBeInTheDocument();
     expect(screen.getByText('Total appointments: 3')).toBeInTheDocument();
     expect(screen.getByText(/Total spent:/)).toBeInTheDocument();

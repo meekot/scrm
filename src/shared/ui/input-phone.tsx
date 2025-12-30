@@ -92,7 +92,6 @@ function CountrySelect({
   const selectedOption =
     orderedOptions.find((option) => option.value === selectedCountry) ?? orderedOptions[0];
   const selectedLabel = selectedOption?.label ?? selectedCountry;
-  const selectedCallingCode = selectedCountry ? getCountryCallingCode(selectedCountry) : "";
   const SelectedFlag = selectedCountry ? flags[selectedCountry] : null;
 
   return (
